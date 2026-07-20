@@ -1,0 +1,1705 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:Pretendard,-apple-system,sans-serif;background:#F4EEE4;color:#2B2622;-webkit-font-smoothing:antialiased;}
+    @keyframes jw-fade{from{transform:translateY(10px);}to{transform:translateY(0);}}
+    @keyframes jw-spin{to{transform:rotate(360deg);}}
+    @keyframes jw-toast{from{opacity:0;transform:translate(-50%,12px);}to{opacity:1;transform:translate(-50%,0);}}
+    input::placeholder,textarea::placeholder{color:#B6AB9B;}
+    textarea{font-family:inherit;}
+  </style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#F4EEE4;">
+
+  <header style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 20px;border-bottom:1px solid #E8E0D3;background:rgba(252,249,243,.82);backdrop-filter:blur(10px);position:sticky;top:0;z-index:20;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <img src="./uploads/ptstar-logo.png" alt="PTSTAR" style="height:32px;width:auto;">
+      <span style="font-family:'Gowun Batang',serif;font-size:17px;font-weight:700;letter-spacing:-.01em;">조하리의 창 - PTSTAR 퍼스널브랜딩</span>
+    </div>
+    <sc-if value="{{ inSession }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="{{ rolePillStyle }}">{{ roleLabel }}</span>
+        <button onClick="{{ onExit }}" style="border:1px solid #E2D9CC;background:#FCF9F3;color:#8C8378;border-radius:9px;padding:6px 12px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;" style-hover="{{ exitHover }}">나가기</button>
+      </div>
+    </sc-if>
+  </header>
+
+  <main style="flex:1;display:flex;flex-direction:column;align-items:center;padding:0 18px 64px;">
+
+    <!-- LOADING -->
+    <sc-if value="{{ v_loading }}" hint-placeholder-val="{{ true }}">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;min-height:60vh;color:#A89B89;">
+        <div style="width:34px;height:34px;border:3px solid #E2D9CC;border-top-color:#C2714F;border-radius:50%;animation:jw-spin .8s linear infinite;"></div>
+        <span style="font-size:14px;">준비하는 중…</span>
+      </div>
+    </sc-if>
+
+    <!-- LANDING -->
+    <sc-if value="{{ v_landing }}" hint-placeholder-val="{{ false }}">
+      <div style="width:100%;max-width:480px;margin-top:5vh;animation:jw-fade .5s ease;">
+        <div style="text-align:center;margin-bottom:24px;">
+          <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0;">
+            <img src="./uploads/ptstar-logo.png" alt="PTSTAR" style="height:50px;width:auto;">
+            <span style="font-family:'Gowun Batang',serif;font-size:24px;font-weight:600;color:#C2714F;">PTSTAR 퍼스널브랜딩 커리큘럼</span>
+          </div>
+          <h1 style="font-family:'Gowun Batang',serif;font-size:38px;font-weight:700;margin:0 0 12px;letter-spacing:-.02em;line-height:1.15;">조하리의 창</h1>
+          <p style="margin:0;color:#8C8378;font-size:15px;line-height:1.6;">서로의 눈으로 발견하는 나.<br>형용사를 골라 네 개의 창을 함께 채워봐요.<br><span style="font-size:13px;color:#A89B89;">퍼스널브랜딩의 첫 걸음, 자기 인식부터 시작해요</span></p>
+        </div>
+
+        <div style="background:#FCF9F3;border:1px solid #EAE1D3;border-radius:20px;padding:8px;box-shadow:0 1px 2px rgba(43,38,34,.04),0 14px 30px rgba(43,38,34,.06);">
+          <div style="display:flex;gap:4px;background:#F1E9DC;border-radius:14px;padding:4px;margin-bottom:6px;">
+            <button onClick="{{ setPartTab }}" style="{{ partTabStyle }}">참가자로 시작</button>
+            <button onClick="{{ setAdminTab }}" style="{{ adminTabStyle }}">관리자</button>
+          </div>
+
+          <!-- PARTICIPANT: pick name + birthday code -->
+          <sc-if value="{{ isPartTab }}" hint-placeholder-val="{{ true }}">
+            <div style="padding:16px;display:flex;flex-direction:column;gap:12px;">
+              <sc-if value="{{ pickListMode }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                  <span style="font-size:14px;font-weight:600;color:#2B2622;">본인 이름을 선택해주세요</span>
+                  <sc-if value="{{ pickEmpty }}" hint-placeholder-val="{{ false }}">
+                    <div style="color:#A89B89;font-size:14px;padding:24px 6px;text-align:center;line-height:1.6;">아직 준비 중이에요.<br>관리자가 참가자를 등록하면 시작할 수 있어요.</div>
+                  </sc-if>
+                  <div style="display:flex;flex-direction:column;gap:8px;max-height:360px;overflow:auto;">
+                    <sc-for list="{{ pickRoster }}" as="r" hint-placeholder-count="5">
+                      <button onClick="{{ r.onPick }}" style="{{ r.style }}">
+                        <span style="display:flex;align-items:center;gap:10px;">
+                          <span style="width:32px;height:32px;border-radius:50%;background:#F1E9DC;display:flex;align-items:center;justify-content:center;font-family:'Gowun Batang',serif;font-weight:700;font-size:14px;color:#8C7B5E;">{{ r.initial }}</span>
+                          <span style="font-size:16px;font-weight:600;color:#2B2622;">{{ r.name }}</span>
+                        </span>
+                        <sc-if value="{{ r.claimed }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:600;color:#7C8A6E;background:#E7EBDF;border-radius:999px;padding:4px 9px;">입장함</span></sc-if>
+                      </button>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ codeEntryMode }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:14px;">
+                  <button onClick="{{ cancelEntry }}" style="background:none;border:none;color:#8C8378;font-size:13px;cursor:pointer;font-family:inherit;text-align:left;padding:0;">← 이름 다시 선택</button>
+                  <div>
+                    <div style="font-size:16px;font-weight:600;color:#2B2622;"><b style="color:#C2714F;">{{ pendingName }}</b> 님, 생일코드를 입력해주세요</div>
+                    <div style="font-size:13px;color:#9A8F7F;line-height:1.6;margin-top:5px;">관리자가 알려준 생일코드를 입력하면 본인 세션으로 들어가요.</div>
+                  </div>
+                  <input value="{{ codeInput }}" onChange="{{ onCodeInput }}" placeholder="생일코드 (예: 0312)" style="width:100%;padding:14px 16px;border-radius:12px;border:1.5px solid #E2D9CC;background:#fff;font-size:16px;font-family:'Gowun Batang',serif;letter-spacing:.14em;font-weight:700;color:#2B2622;outline:none;" style-focus="{{ inputFocus }}" />
+                  <sc-if value="{{ hasCodeErr }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size:13px;color:#B5523B;background:#F7E7E1;border-radius:10px;padding:9px 12px;">{{ codeErr }}</div>
+                  </sc-if>
+                  <button onClick="{{ doSubmitCode }}" style="width:100%;padding:15px;border-radius:13px;border:none;background:#C2714F;color:#fff;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 6px 16px rgba(194,113,79,.28);" style-hover="{{ primaryHover }}">들어가기</button>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <!-- ADMIN: create or enter -->
+          <sc-if value="{{ isAdminTab }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:18px 16px 16px;">
+
+              <!-- Admin login first -->
+              <sc-if value="{{ adminLoginMode }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;flex-direction:column;gap:14px;">
+                  <div>
+                    <div style="font-size:14px;font-weight:600;color:#2B2622;margin-bottom:4px;">관리자 로그인</div>
+                    <div style="font-size:13px;color:#9A8F7F;line-height:1.6;">관리자 코드를 입력하여 세션을 관리하세요.</div>
+                  </div>
+                  <input value="{{ adminCodeInput }}" onChange="{{ onAdminCode }}" placeholder="관리자 코드" style="width:100%;padding:14px 16px;border-radius:12px;border:1.5px solid #E2D9CC;background:#fff;font-size:16px;font-family:'Gowun Batang',serif;letter-spacing:.14em;font-weight:700;color:#2B2622;outline:none;" style-focus="{{ inputFocus }}" />
+                  <sc-if value="{{ hasAdminErr }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size:13px;color:#B5523B;background:#F7E7E1;border-radius:10px;padding:9px 12px;">{{ adminErr }}</div>
+                  </sc-if>
+                  <button onClick="{{ doAdminLogin }}" style="width:100%;padding:15px;border-radius:13px;border:none;background:#7C8A6E;color:#fff;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 6px 16px rgba(124,138,110,.26);" style-hover="{{ greenHover }}">관리자로 들어가기</button>
+                </div>
+              </sc-if>
+
+              <!-- enter (session exists) -->
+              <sc-if value="{{ adminEnterMode }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:14px;">
+                  <div>
+                    <div style="font-size:14px;font-weight:600;color:#2B2622;margin-bottom:4px;">관리자 화면</div>
+                    <div style="font-size:13px;color:#9A8F7F;line-height:1.6;">'{{ sessionTitle }}' 세션이 진행 중이에요.</div>
+                  </div>
+                  <sc-if value="{{ hasAdminErr }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size:13px;color:#B5523B;background:#F7E7E1;border-radius:10px;padding:9px 12px;">{{ adminErr }}</div>
+                  </sc-if>
+                  <button onClick="{{ doEnterAdmin }}" style="width:100%;padding:15px;border-radius:13px;border:none;background:#7C8A6E;color:#fff;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 6px 16px rgba(124,138,110,.26);" style-hover="{{ greenHover }}">관리 화면 들어가기</button>
+                </div>
+              </sc-if>
+
+              <!-- create (no session yet) -->
+              <sc-if value="{{ adminCreateMode }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;flex-direction:column;gap:14px;">
+                  <div style="display:flex;flex-direction:column;gap:7px;">
+                    <label style="font-size:13px;font-weight:600;color:#6B6359;">세션 제목</label>
+                    <input value="{{ createTitle }}" onChange="{{ onCreateTitle }}" placeholder="예: 1팀 PB 실습" maxlength="30" style="width:100%;padding:13px 16px;border-radius:12px;border:1.5px solid #E2D9CC;background:#fff;font-size:15px;font-family:inherit;color:#2B2622;outline:none;" style-focus="{{ inputFocus }}" />
+                  </div>
+                  <div style="display:flex;gap:10px;">
+                    <div style="flex:1;display:flex;flex-direction:column;gap:7px;">
+                      <label style="font-size:13px;font-weight:600;color:#6B6359;">자기평가 최대</label>
+                      <input value="{{ createMaxSelf }}" onChange="{{ onCreateMaxSelf }}" type="number" min="1" max="15" style="width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid #E2D9CC;background:#fff;font-size:15px;font-family:inherit;color:#2B2622;outline:none;" style-focus="{{ inputFocus }}" />
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column;gap:7px;">
+                      <label style="font-size:13px;font-weight:600;color:#6B6359;">타인평가 최대</label>
+                      <input value="{{ createMaxPeer }}" onChange="{{ onCreateMaxPeer }}" type="number" min="1" max="15" style="width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid #E2D9CC;background:#fff;font-size:15px;font-family:inherit;color:#2B2622;outline:none;" style-focus="{{ inputFocus }}" />
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:7px;">
+                    <label style="font-size:13px;font-weight:600;color:#6B6359;">참가자 이름 + 생일코드 <span style="color:#A89B89;font-weight:400;">· 한 줄에: 이름 생일코드</span></label>
+                    <textarea value="{{ createNames }}" onChange="{{ onCreateNames }}" placeholder="김홍윤 0312&#10;박민수 1105&#10;이지민 0728&#10;최예원 0429" rows="4" style="width:100%;padding:12px 16px;border-radius:12px;border:1.5px solid #E2D9CC;background:#fff;font-size:15px;color:#2B2622;outline:none;resize:vertical;line-height:1.7;" style-focus="{{ inputFocus }}"></textarea>
+                    <span style="font-size:12px;color:#A89B89;">{{ nameCountLabel }}</span>
+                  </div>
+                  <button onClick="{{ doCreate }}" style="width:100%;padding:15px;border-radius:13px;border:none;background:#7C8A6E;color:#fff;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 6px 16px rgba(124,138,110,.26);" style-hover="{{ greenHover }}">세션 만들기</button>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- EXTERNAL EVALUATION -->
+    <sc-if value="{{ v_external }}" hint-placeholder-val="{{ false }}">
+      <div style="width:100%;max-width:680px;margin-top:40px;animation:jw-fade .45s ease;">
+        
+        <!-- 평가 완료 화면 -->
+        <sc-if value="{{ externalEvalCompleted }}" hint-placeholder-val="{{ false }}">
+          <div style="text-align:center;padding:40px 20px;">
+            <img src="uploads/ptstar-logo.png" alt="PTSTAR" style="height:50px;margin-bottom:24px;">
+            <div style="font-size:48px;margin-bottom:16px;">✅</div>
+            <h2 style="font-family:'Gowun Batang',serif;font-size:28px;margin:0 0 12px;color:#2B2622;">평가가 완료되었습니다</h2>
+            <p style="color:#8C8378;font-size:16px;margin:0 0 32px;line-height:1.6;">
+              <span style="color:#C2714F;font-weight:600;">{{ evalTargetName }}</span> 님에 대한 평가가<br>
+              성공적으로 제출되었습니다.
+            </p>
+            <div style="background:#FCF9F3;border:1px solid #EAE1D3;border-radius:14px;padding:20px;">
+              <p style="color:#6B6359;font-size:14px;margin:0;line-height:1.6;">
+                귀하의 소중한 의견이 {{ evalTargetName }} 님의<br>
+                조하리의 창 결과에 반영되었습니다.<br>
+                참여해 주셔서 감사합니다.
+              </p>
+            </div>
+          </div>
+        </sc-if>
+        
+        <!-- 평가 폼 -->
+        <sc-if value="{{ !externalEvalCompleted }}" hint-placeholder-val="{{ true }}">
+          <div style="text-align:center;margin-bottom:32px;">
+            <img src="uploads/ptstar-logo.png" alt="PTSTAR" style="height:50px;margin-bottom:16px;">
+            <h1 style="font-family:'Gowun Batang',serif;font-size:32px;margin:0 0 12px;">외부 평가</h1>
+            <p style="color:#8C8378;font-size:15px;margin:0;line-height:1.6;">
+              <span style="color:#C2714F;font-weight:600;">{{ evalTargetName }}</span> 님을 평가해주세요
+            </p>
+          </div>
+
+          <div style="background:#fff;border:1px solid #E2D9CC;border-radius:18px;padding:24px;">
+            <h2 style="font-family:'Gowun Batang',serif;font-size:22px;margin:0 0 10px;">{{ evalTargetName }} 님을 잘 설명하는 형용사는?</h2>
+            <p style="color:#8C8378;font-size:14px;margin:0 0 24px;line-height:1.6;">
+              {{ evalTargetName }} 님을 떠올렸을 때 생각나는 단어를 골라주세요.<br>
+              최대 {{ maxExternal }}개까지 선택할 수 있어요.
+            </p>
+            
+            <div style="display:flex;flex-wrap:wrap;gap:9px;margin-bottom:28px;">
+              <sc-for list="{{ externalChips }}" as="c" hint-placeholder-count="30">
+                <button onClick="{{ c.onClick }}" style="{{ c.style }}">
+                  <span style="font-size:15px;line-height:1.1;">{{ c.word }}</span>
+                  <span style="font-size:10px;color:#A89B89;font-weight:500;line-height:1;">{{ c.en }}</span>
+                </button>
+              </sc-for>
+            </div>
+            
+            <div style="border-top:1px solid #EFE7D9;padding-top:20px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                <span style="font-size:14px;color:#6B6359;font-weight:500;">
+                  선택 <b style="color:#C2714F;">{{ externalCount }}</b> / {{ maxExternal }}
+                </span>
+              </div>
+              <button onClick="{{ doSubmitExternal }}" style="{{ submitExternalStyle }}">
+                평가 완료하기
+              </button>
+            </div>
+          </div>
+
+          <div style="text-align:center;margin-top:24px;">
+            <p style="color:#A89B89;font-size:13px;">
+              이 평가는 익명으로 처리되며, {{ evalTargetName }} 님의 조하리의 창 결과에 반영됩니다.
+            </p>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- PARTICIPANT -->
+    <sc-if value="{{ v_participant }}" hint-placeholder-val="{{ false }}">
+      <div style="width:100%;max-width:680px;margin-top:22px;animation:jw-fade .45s ease;">
+        <div style="text-align:center;margin-bottom:18px;">
+          <span style="font-size:13px;color:#8C8378;">{{ sessionTitle }} · </span><span style="font-size:13px;color:#C2714F;font-weight:600;">{{ myName }}</span>
+        </div>
+        <div style="display:flex;gap:4px;background:#F1E9DC;border-radius:14px;padding:4px;margin-bottom:24px;">
+          <button onClick="{{ goSelf }}" style="{{ tabSelfStyle }}">1 · 자기평가</button>
+          <button onClick="{{ goPeer }}" style="{{ tabPeerStyle }}">2 · 타인평가</button>
+          <button onClick="{{ goResult }}" style="{{ tabResultStyle }}">내 결과</button>
+        </div>
+
+        <!-- SELF -->
+        <sc-if value="{{ pSelf }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <h2 style="font-family:'Gowun Batang',serif;font-size:24px;margin:0 0 8px;">나를 잘 설명하는 형용사는?</h2>
+            <p style="color:#8C8378;font-size:14px;margin:0 0 20px;line-height:1.6;">스스로 떠오르는 단어를 골라주세요. 최대 {{ maxSelf }}개까지 선택할 수 있어요.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:9px;margin-bottom:24px;">
+              <sc-for list="{{ selfChips }}" as="c" hint-placeholder-count="30">
+                <button onClick="{{ c.onClick }}" style="{{ c.style }}">
+                  <span style="font-size:15px;line-height:1.1;">{{ c.word }}</span>
+                  <span style="font-size:10px;color:#A89B89;font-weight:500;line-height:1;">{{ c.en }}</span>
+                </button>
+              </sc-for>
+            </div>
+            <div style="position:sticky;bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:14px;background:#FCF9F3;border:1px solid #EAE1D3;border-radius:16px;padding:13px 16px;box-shadow:0 8px 24px rgba(43,38,34,.08);">
+              <span style="font-size:14px;color:#6B6359;font-weight:500;">선택 <b style="color:#C2714F;">{{ selfCount }}</b> / {{ maxSelf }}</span>
+              <button onClick="{{ doSaveSelf }}" style="{{ savePrimaryStyle }}">저장하고 다음</button>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- PEER PICK -->
+        <sc-if value="{{ pPeerPick }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <h2 style="font-family:'Gowun Batang',serif;font-size:24px;margin:0 0 8px;">동료에게 형용사를 골라주세요</h2>
+            <p style="color:#8C8378;font-size:14px;margin:0 0 20px;line-height:1.6;">평가할 동료를 선택하세요. <b style="color:#7C8A6E;">{{ peerDoneCount }}/{{ targetCount }}명 완료</b></p>
+            <sc-if value="{{ hasTargets }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <sc-for list="{{ peerTargets }}" as="t" hint-placeholder-count="4">
+                  <button onClick="{{ t.onPick }}" style="{{ t.style }}">
+                    <span style="display:flex;align-items:center;gap:11px;">
+                      <span style="width:36px;height:36px;border-radius:50%;background:#F1E9DC;display:flex;align-items:center;justify-content:center;font-family:'Gowun Batang',serif;font-weight:700;font-size:15px;color:#8C7B5E;">{{ t.initial }}</span>
+                      <span style="font-size:16px;font-weight:600;color:#2B2622;">{{ t.name }}</span>
+                    </span>
+                    <span style="{{ t.badgeStyle }}">{{ t.badge }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ noTargets }}" hint-placeholder-val="{{ false }}">
+              <div style="text-align:center;color:#A89B89;font-size:14px;padding:36px 0;">아직 다른 참가자가 없어요.</div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- PEER EVAL -->
+        <sc-if value="{{ pPeerEval }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <button onClick="{{ backToPick }}" style="background:none;border:none;color:#8C8378;font-size:14px;cursor:pointer;font-family:inherit;margin-bottom:12px;padding:0;">← 동료 목록으로</button>
+            <h2 style="font-family:'Gowun Batang',serif;font-size:23px;margin:0 0 8px;"><b style="color:#C2714F;">{{ targetName }}</b> 님에게 어울리는 형용사</h2>
+            <p style="color:#8C8378;font-size:14px;margin:0 0 20px;line-height:1.6;">최대 {{ maxPeer }}개까지 골라주세요. 솔직하고 따뜻한 시선으로요.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:9px;margin-bottom:24px;">
+              <sc-for list="{{ peerChips }}" as="c" hint-placeholder-count="30">
+                <button onClick="{{ c.onClick }}" style="{{ c.style }}">
+                  <span style="font-size:15px;line-height:1.1;">{{ c.word }}</span>
+                  <span style="font-size:10px;color:#A89B89;font-weight:500;line-height:1;">{{ c.en }}</span>
+                </button>
+              </sc-for>
+            </div>
+            <div style="position:sticky;bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:14px;background:#FCF9F3;border:1px solid #EAE1D3;border-radius:16px;padding:13px 16px;box-shadow:0 8px 24px rgba(43,38,34,.08);">
+              <span style="font-size:14px;color:#6B6359;font-weight:500;">선택 <b style="color:#C2714F;">{{ peerCount }}</b> / {{ maxPeer }}</span>
+              <button onClick="{{ doSubmitPeer }}" style="{{ submitPrimaryStyle }}">제출하기</button>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- RESULT -->
+        <sc-if value="{{ pResult }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="text-align:center;margin-bottom:22px;">
+              <h2 style="font-family:'Gowun Batang',serif;font-size:26px;margin:0;"><b>{{ myName }}</b> 님의 조하리의 창</h2>
+              <p style="color:#A89B89;font-size:13px;margin:8px 0 0;">동료들이 평가할수록 실시간으로 채워져요.</p>
+            </div>
+            <dc-import name="JohariGrid" open="{{ openWords }}" hidden="{{ hiddenWords }}" blind="{{ blindWords }}" unknown="{{ unknownWords }}" hint-size="100%,520px"></dc-import>
+
+            <!-- 네 개의 자아 안내 -->
+            <div style="margin-top:16px;background:#FCF9F3;border:1px solid #EAE1D3;border-radius:16px;padding:18px 20px;">
+              <div style="font-family:'Gowun Batang',serif;font-weight:700;font-size:16px;margin-bottom:14px;">네 개의 자아</div>
+              <div style="display:flex;flex-direction:column;gap:12px;">
+                <div style="border-left:4px solid #7C8A6E;padding-left:12px;">
+                  <div style="font-weight:700;font-size:14px;color:#4E5B3B;">열린 자아 <span style="font-size:12px;font-weight:600;color:#7A8466;margin-left:6px;">나 O · 타인 O</span></div>
+                  <div style="font-size:13px;color:#6B6359;line-height:1.5;margin-top:2px;">나도 알고 남도 아는 자신의 모습</div>
+                </div>
+                <div style="border-left:4px solid #8579A6;padding-left:12px;">
+                  <div style="font-weight:700;font-size:14px;color:#5E5280;">감추어진 자아 <span style="font-size:12px;font-weight:600;color:#897CA5;margin-left:6px;">나 O · 타인 X</span></div>
+                  <div style="font-size:13px;color:#6B6359;line-height:1.5;margin-top:2px;">나는 알지만 남은 모르는 자신의 모습</div>
+                </div>
+                <div style="border-left:4px solid #C08A5E;padding-left:12px;">
+                  <div style="font-weight:700;font-size:14px;color:#9C5A36;">눈먼 자아 <span style="font-size:12px;font-weight:600;color:#B98763;margin-left:6px;">나 X · 타인 O</span></div>
+                  <div style="font-size:13px;color:#6B6359;line-height:1.5;margin-top:2px;">나는 몰랐지만 타인에게 보이는 자신의 모습</div>
+                </div>
+                <div style="border-left:4px solid #A2937A;padding-left:12px;">
+                  <div style="font-weight:700;font-size:14px;color:#7C6E54;">알 수 없는 자아 <span style="font-size:12px;font-weight:600;color:#A2937A;margin-left:6px;">나 X · 타인 X</span></div>
+                  <div style="font-size:13px;color:#6B6359;line-height:1.5;margin-top:2px;">나도 모르고 남도 모르는 자신의 모습</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:16px;background:#FCF9F3;border:1px solid #EAE1D3;border-radius:16px;padding:20px;">
+              <div style="font-family:'Gowun Batang',serif;font-weight:700;font-size:16px;margin-bottom:14px;">돌아보기</div>
+              <ul style="margin:0;padding-left:18px;color:#6B6359;font-size:14px;line-height:1.9;">
+                <li>열린 영역에서 더 키우고 싶은 강점은 무엇인가요?</li>
+                <li>보이지 않는 영역에서 새롭게 발견한 나의 모습은?</li>
+                <li>숨겨진 영역에서 앞으로 더 드러내고 싶은 면은?</li>
+                <li>미지의 영역에서 실험해보고 싶은 가능성은?</li>
+              </ul>
+            </div>
+            
+            <!-- Share Link Button -->
+            <div style="margin-top:16px;">
+              <button onClick="{{ generateShareLink }}" style="width:100%;padding:14px;border-radius:12px;border:1.5px solid #C2714F;background:#fff;color:#C2714F;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;" style-hover="{{ background: '#FFF9F6' }}">
+                외부 평가 링크 생성하기
+              </button>
+            </div>
+            <div style="margin-top:16px;">
+              <button onClick="{{ doSaveResultImage }}" style="width:100%;padding:14px;border-radius:12px;border:none;background:#4c7720;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 6px 16px rgba(124,138,110,.24);" style-hover="{{ background: '#6B7A5E' }}">
+                결과 이미지로 저장
+              </button>
+            </div>
+            
+            <!-- Share Link Modal -->
+            <sc-if value="{{ showShareModal }}" hint-placeholder-val="{{ false }}">
+              <div style="position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;animation:jw-fade .2s ease;">
+                <div style="background:#fff;border-radius:18px;padding:24px;width:90%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.15);">
+                  <h3 style="font-family:'Gowun Batang',serif;font-size:22px;margin:0 0 12px;">외부 평가 링크</h3>
+                  <p style="color:#8C8378;font-size:14px;margin:0 0 20px;line-height:1.6;">이 링크를 공유하면 참가자가 아닌 외부 인원도 {{ myName }}님을 평가할 수 있어요.</p>
+                  
+                  <div style="background:#F9F6F1;border:1px solid #E2D9CC;border-radius:12px;padding:12px;margin-bottom:16px;word-break:break-all;">
+                    <div style="font-size:13px;color:#C2714F;font-family:monospace;">{{ shareLink }}</div>
+                  </div>
+                  
+                  <div style="display:flex;gap:10px;">
+                    <button onClick="{{ copyShareLink }}" style="flex:1;padding:12px;border-radius:11px;border:none;background:#C2714F;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">링크 복사</button>
+                    <button onClick="{{ closeShareModal }}" style="padding:12px 20px;border-radius:11px;border:1.5px solid #E2D9CC;background:#fff;color:#6B6359;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">닫기</button>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- HOST ADMIN -->
+    <sc-if value="{{ v_admin }}" hint-placeholder-val="{{ false }}">
+      <div style="width:100%;max-width:920px;margin-top:26px;animation:jw-fade .45s ease;">
+        <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:20px;">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#7C8A6E;letter-spacing:.04em;margin-bottom:4px;">관리자 화면</div>
+            <h2 style="font-family:'Gowun Batang',serif;font-size:26px;margin:0;">{{ sessionTitle }}</h2>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="background:#FCF9F3;border:1px solid #EAE1D3;border-radius:13px;padding:10px 16px;">
+              <span style="font-size:12px;color:#A89B89;">관리자 코드</span>
+              <span style="font-family:'Gowun Batang',serif;font-weight:700;font-size:20px;letter-spacing:.12em;color:#C2714F;margin-left:8px;">{{ adminCode }}</span>
+            </div>
+            <button onClick="{{ doResetAsk }}" style="padding:10px 16px;border-radius:13px;border:1px solid #F8D7DA;background:#FFF5F5;color:#B5523B;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;" style-hover="{{ resetHover }}">세션 삭제</button>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;">
+          <div style="background:#FCF9F3;border:1px solid #EAE1D3;border-radius:15px;padding:16px;">
+            <div style="font-size:12px;color:#A89B89;font-weight:600;margin-bottom:6px;">참가자</div>
+            <div style="font-family:'Gowun Batang',serif;font-size:30px;font-weight:700;color:#2B2622;">{{ total }}<span style="font-size:15px;color:#A89B89;font-weight:400;"> 명</span></div>
+          </div>
+          <div style="background:#FCF9F3;border:1px solid #EAE1D3;border-radius:15px;padding:16px;">
+            <div style="font-size:12px;color:#A89B89;font-weight:600;margin-bottom:6px;">입장 완료</div>
+            <div style="font-family:'Gowun Batang',serif;font-size:30px;font-weight:700;color:#7C8A6E;">{{ joinedCount }}<span style="font-size:15px;color:#A89B89;font-weight:400;"> 명</span></div>
+          </div>
+          <div style="background:#FCF9F3;border:1px solid #EAE1D3;border-radius:15px;padding:16px;">
+            <div style="font-size:12px;color:#A89B89;font-weight:600;margin-bottom:6px;">자기평가 완료</div>
+            <div style="font-family:'Gowun Batang',serif;font-size:30px;font-weight:700;color:#C2714F;">{{ selfDone }}<span style="font-size:15px;color:#A89B89;font-weight:400;"> 명</span></div>
+          </div>
+          <div style="background:#FCF9F3;border:1px solid #EAE1D3;border-radius:15px;padding:16px;">
+            <div style="font-size:12px;color:#A89B89;font-weight:600;margin-bottom:6px;">외부 평가</div>
+            <div style="font-family:'Gowun Batang',serif;font-size:30px;font-weight:700;color:#6B5B85;">{{ extTotal }}<span style="font-size:15px;color:#A89B89;font-weight:400;"> 건</span></div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:minmax(320px,420px) 1fr;gap:16px;align-items:start;">
+          <div style="background:#FCF9F3;border:1px solid #EAE1D3;border-radius:15px;padding:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:0 4px;">
+              <span style="font-size:12px;color:#A89B89;font-weight:600;">참가자 진행 상황</span>
+              <span style="font-size:11px;color:#B6AB9B;">행을 누르면 결과 보기</span>
+            </div>
+            <sc-if value="{{ adminEmpty }}" hint-placeholder-val="{{ false }}">
+              <div style="color:#B6AB9B;font-size:14px;padding:20px 8px;text-align:center;">참가자를 추가해주세요.</div>
+            </sc-if>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <sc-for list="{{ adminRoster }}" as="p" hint-placeholder-count="5">
+                <button onClick="{{ p.onView }}" style="{{ p.rowStyle }}">
+                  <span style="display:flex;align-items:center;gap:9px;min-width:0;">
+                    <span style="width:30px;height:30px;flex:none;border-radius:50%;background:#F1E9DC;display:flex;align-items:center;justify-content:center;font-family:'Gowun Batang',serif;font-weight:700;font-size:13px;color:#8C7B5E;">{{ p.initial }}</span>
+                    <span style="display:flex;flex-direction:column;min-width:0;">
+                      <span style="font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25;">{{ p.name }}</span>
+                      <span style="font-size:11px;color:#A89B89;line-height:1.2;">{{ p.codeLabel }}</span>
+                    </span>
+                  </span>
+                  <span style="display:flex;align-items:center;gap:6px;flex:none;">
+                    <span style="{{ p.joinChip }}">입장</span>
+                    <span style="{{ p.selfChip }}">자기</span>
+                    <span style="{{ p.peerChipStyle }}">타인 {{ p.given }}/{{ p.others }}</span>
+                    <span style="{{ p.extChip }}">외부 {{ p.extCount }}</span>
+                  </span>
+                </button>
+              </sc-for>
+            </div>
+            <div style="display:flex;gap:7px;margin-top:12px;padding-top:12px;border-top:1px solid #EFE7D9;">
+              <input value="{{ newName }}" onChange="{{ onNewName }}" placeholder="이름" maxlength="12" style="flex:1;min-width:0;padding:10px 12px;border-radius:10px;border:1.5px solid #E2D9CC;background:#fff;font-size:14px;font-family:inherit;color:#2B2622;outline:none;" style-focus="{{ inputFocus }}" />
+              <input value="{{ newCode }}" onChange="{{ onNewCode }}" placeholder="생일코드" maxlength="12" style="width:92px;flex:none;padding:10px 12px;border-radius:10px;border:1.5px solid #E2D9CC;background:#fff;font-size:14px;font-family:inherit;color:#2B2622;outline:none;" style-focus="{{ inputFocus }}" />
+              <button onClick="{{ doAddName }}" style="flex:none;padding:10px 14px;border-radius:10px;border:none;background:#7C8A6E;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;" style-hover="{{ greenHover }}">추가</button>
+            </div>
+          </div>
+
+          <div>
+            <sc-if value="{{ adminHasView }}" hint-placeholder-val="{{ false }}">
+              <div style="background:#FCF9F3;border:1px solid #EAE1D3;border-radius:16px;padding:18px;">
+                <h3 style="font-family:'Gowun Batang',serif;font-size:20px;margin:0 0 14px;"><b>{{ resultName }}</b> 님의 조하리의 창</h3>
+                <div style="background:#F4EFE7;border:1px solid #EFE7D9;border-radius:12px;padding:12px 14px;margin-bottom:16px;">
+                  <div style="font-size:12px;font-weight:600;color:#8C8378;margin-bottom:8px;">{{ resultName }} 님이 아직 평가하지 않은 동료 <span style="color:#C2714F;">{{ notEvalCount }}</span></div>
+                  <sc-if value="{{ notEvalDone }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:#7C8A6E;">모든 동료를 평가했어요 ✓</span></sc-if>
+                  <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                    <sc-for list="{{ notEvalNames }}" as="n" hint-placeholder-count="2">
+                      <span style="font-size:13px;color:#8A4F30;background:#F4E5D8;border:1px solid #EAD2BD;border-radius:999px;padding:4px 11px;">{{ n.name }}</span>
+                    </sc-for>
+                  </div>
+                </div>
+                <sc-if value="{{ hasResultExt }}" hint-placeholder-val="{{ false }}">
+                  <div style="background:#F1ECF7;border:1px solid #E0D6EC;border-radius:12px;padding:11px 14px;margin-bottom:16px;font-size:13px;color:#6B5B85;">
+                    외부 평가 <b>{{ resultExtCount }}건</b>이 이 결과에 반영되어 있어요.
+                  </div>
+                </sc-if>
+                <dc-import name="JohariGrid" open="{{ openWords }}" hidden="{{ hiddenWords }}" blind="{{ blindWords }}" unknown="{{ unknownWords }}" hint-size="100%,500px"></dc-import>
+
+                <!-- 네 개의 자아 안내 -->
+                <div style="margin-top:14px;background:#fff;border:1px solid #EFE7D9;border-radius:14px;padding:16px 18px;">
+                  <div style="font-family:'Gowun Batang',serif;font-weight:700;font-size:15px;margin-bottom:12px;">네 개의 자아</div>
+                  <div style="display:flex;flex-direction:column;gap:10px;">
+                    <div style="border-left:4px solid #7C8A6E;padding-left:11px;">
+                      <div style="font-weight:700;font-size:13px;color:#4E5B3B;">열린 자아 <span style="font-size:11px;font-weight:600;color:#7A8466;margin-left:5px;">나 O · 타인 O</span></div>
+                      <div style="font-size:12px;color:#6B6359;line-height:1.5;margin-top:2px;">나도 알고 남도 아는 자신의 모습</div>
+                    </div>
+                    <div style="border-left:4px solid #8579A6;padding-left:11px;">
+                      <div style="font-weight:700;font-size:13px;color:#5E5280;">감추어진 자아 <span style="font-size:11px;font-weight:600;color:#897CA5;margin-left:5px;">나 O · 타인 X</span></div>
+                      <div style="font-size:12px;color:#6B6359;line-height:1.5;margin-top:2px;">나는 알지만 남은 모르는 자신의 모습</div>
+                    </div>
+                    <div style="border-left:4px solid #C08A5E;padding-left:11px;">
+                      <div style="font-weight:700;font-size:13px;color:#9C5A36;">눈먼 자아 <span style="font-size:11px;font-weight:600;color:#B98763;margin-left:5px;">나 X · 타인 O</span></div>
+                      <div style="font-size:12px;color:#6B6359;line-height:1.5;margin-top:2px;">나는 몰랐지만 타인에게 보이는 자신의 모습</div>
+                    </div>
+                    <div style="border-left:4px solid #A2937A;padding-left:11px;">
+                      <div style="font-weight:700;font-size:13px;color:#7C6E54;">알 수 없는 자아 <span style="font-size:11px;font-weight:600;color:#A2937A;margin-left:5px;">나 X · 타인 X</span></div>
+                      <div style="font-size:12px;color:#6B6359;line-height:1.5;margin-top:2px;">나도 모르고 남도 모르는 자신의 모습</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="margin-top:14px;">
+                  <button onClick="{{ doSaveResultImage }}" style="width:100%;padding:13px;border-radius:12px;border:none;background:#7C8A6E;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 5px 14px rgba(124,138,110,.22);" style-hover="{{ background: '#6B7A5E' }}">
+                    결과 이미지로 저장
+                  </button>
+                </div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ adminNoView }}" hint-placeholder-val="{{ true }}">
+              <div style="background:#FCF9F3;border:1px dashed #DDD2C2;border-radius:16px;padding:48px 24px;text-align:center;color:#B6AB9B;font-size:14px;">왼쪽에서 참가자를 선택하면<br>조하리의 창이 나타나요.</div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+  </main>
+
+  <footer style="text-align:center;padding:24px 16px 28px;color:#B6AB9B;font-size:12px;">© yewoonn</footer>
+
+  <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#2B2622;color:#F4EEE4;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:500;box-shadow:0 10px 30px rgba(43,38,34,.25);animation:jw-toast .25s ease both;z-index:50;">{{ toast }}</div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  CODE = sessionStorage.getItem('johari_session_code') || '';
+
+  state = {
+    ready: false, backendMode: 'local', uid: null,
+    role: null, slotId: null,
+    session: null, participants: [], peerVotesByTarget: {},
+    landingTab: 'participant',
+    createTitle: '', createMaxSelf: 5, createMaxPeer: 5, createNames: '',
+    adminCodeInput: '', adminErr: '', adminAuthenticated: false,
+    pendingSlotId: null, codeInput: '', codeErr: '',
+    participantTab: 'self', selfSel: [], peerTargetId: null, peerSel: [],
+    adminViewId: null, newName: '', newCode: '', toast: '',
+    // 외부 평가 관련
+    externalEvalMode: false, evalSessionCode: null, evalTargetId: null, evalTargetName: '',
+    externalWords: [], shareLink: '', showShareModal: false, sessionId: null, externalEvalCompleted: false
+  };
+
+  ADJ = [
+    {ko:'유능한',en:'able'},{ko:'수용적인',en:'accepting'},{ko:'융통성 있는',en:'adaptable'},{ko:'대담한',en:'bold'},
+    {ko:'용감한',en:'brave'},{ko:'침착한',en:'calm'},{ko:'배려하는',en:'caring'},{ko:'쾌활한',en:'cheerful'},
+    {ko:'영리한',en:'clever'},{ko:'복합적인',en:'complex'},{ko:'자신감 있는',en:'confident'},{ko:'의지할만한',en:'dependable'},
+    {ko:'위엄있는',en:'dignified'},{ko:'공감적인',en:'empathetic'},{ko:'활기찬',en:'energetic'},{ko:'외향적인',en:'extroverted'},
+    {ko:'친근한',en:'friendly'},{ko:'베푸는',en:'giving'},{ko:'행복한',en:'happy'},{ko:'도움이 되는',en:'helpful'},
+    {ko:'이상주의적인',en:'idealistic'},{ko:'독립적인',en:'independent'},{ko:'독창적인',en:'ingenious'},{ko:'총명한',en:'intelligent'},
+    {ko:'내향적인',en:'introverted'},{ko:'친절한',en:'kind'},{ko:'박식한',en:'knowledgeable'},{ko:'논리적인',en:'logical'},
+    {ko:'다정한',en:'loving'},{ko:'성숙한',en:'mature'},{ko:'겸손한',en:'modest'},{ko:'긴장하는',en:'nervous'},
+    {ko:'관찰력 있는',en:'observant'},{ko:'낙관적인',en:'optimistic'},{ko:'체계적인',en:'organized'},{ko:'인내심 있는',en:'patient'},
+    {ko:'영향력 있는',en:'powerful'},{ko:'자부심 있는',en:'proud'},{ko:'조용한',en:'quiet'},{ko:'생각이 깊은',en:'reflective'},
+    {ko:'느긋한',en:'relaxed'},{ko:'반응이 빠른',en:'responsive'},{ko:'탐구적인',en:'searching'},{ko:'자기 주장이 강한',en:'self-assertive'},
+    {ko:'자의식이 강한',en:'self-conscious'},{ko:'분별력 있는',en:'sensible'},{ko:'감상적인',en:'sentimental'},{ko:'수줍은',en:'shy'},
+    {ko:'장난스러운',en:'silly'},{ko:'즉흥적인',en:'spontaneous'},{ko:'동정심 있는',en:'sympathetic'},{ko:'신뢰할 수 있는',en:'trustworthy'},
+    {ko:'따뜻한',en:'warm'},{ko:'지혜로운',en:'wise'},{ko:'재치있는',en:'witty'}
+  ];
+
+  // 첫 렌더(componentDidMount 이전)에도 존재하도록 클래스 필드로 초기화한다.
+  // (렌더 중 pool.map / _enMap 접근이 undefined로 터지는 문제 방지)
+  _poolKo = this.ADJ.map(a => a.ko);
+  _enMap = this.ADJ.reduce((m, a) => { m[a.ko] = a.en; return m; }, {});
+
+  FB_CONFIG = {
+    apiKey: "AIzaSyCBtRX-1u73-2bjPdt8Ssd3zdKn6M3Oojs",
+    authDomain: "johari-d3a1a.firebaseapp.com",
+    projectId: "johari-d3a1a",
+    storageBucket: "johari-d3a1a.firebasestorage.app",
+    messagingSenderId: "559893041731",
+    appId: "1:559893041731:web:29a9d622a4a3adb5fa3af6"
+  };
+
+  componentDidMount() {
+    // URL 파라미터 확인 - 외부 평가 모드
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('eval') === 'true') {
+      const sessionCode = urlParams.get('session');
+      const targetId = urlParams.get('target');
+      this._elog('외부 평가 모드 진입. URL 파라미터:', { session: sessionCode, target: targetId, url: window.location.href });
+      if (!sessionCode || !targetId) {
+        this._elog('경고: session 또는 target 파라미터 누락 → 데이터 로드 단계에서 "잘못된 링크" 처리됨');
+      }
+
+      // 외부 평가 모드 설정
+      // 클래스 필드 CODE도 함께 설정해야 로컬 모드의 _saveDb/_refreshLocal이 올바른 세션을 가리킴
+      this.CODE = sessionCode || '';
+      this.setState({
+        externalEvalMode: true,
+        evalSessionCode: sessionCode,
+        evalTargetId: targetId,
+        CODE: sessionCode // 세션 코드 설정
+      });
+    }
+    
+    // Firestore가 권한 거부(규칙 미게시)일 때 발생하는 unhandled rejection 소음을 막아줍니다.
+    this._rej = (ev) => {
+      const r = ev.reason || {};
+      if (r.code === 'permission-denied' || r.name === 'FirebaseError') ev.preventDefault();
+    };
+    window.addEventListener('unhandledrejection', this._rej);
+    this._unsubs = []; this._voteUnsubs = {};
+    // _enMap / _poolKo 는 클래스 필드로 이미 초기화됨 (첫 렌더 안전용)
+    this._chan = ('BroadcastChannel' in window) ? new BroadcastChannel('johari_rt') : null;
+    if (this._chan) this._chan.onmessage = (e) => { if (e.data && e.data.code === this.CODE) this._refreshLocal(); };
+    this._onStorage = (e) => { if (e.key === 'johari_db_v1' && this.state.backendMode === 'local') this._refreshLocal(); };
+    window.addEventListener('storage', this._onStorage);
+    this._init();
+  }
+  componentWillUnmount() {
+    window.removeEventListener('storage', this._onStorage);
+    if (this._rej) window.removeEventListener('unhandledrejection', this._rej);
+    if (this._chan) this._chan.close();
+    if (this._resolveUnsub) { this._resolveUnsub(); this._resolveUnsub = null; }
+    (this._unsubs || []).forEach(f => f && f());
+    Object.values(this._voteUnsubs || {}).forEach(f => f && f());
+  }
+
+  async _init() {
+    try {
+      await this._loadFirebase();
+      if (!window.firebase.apps.length) window.firebase.initializeApp(this.FB_CONFIG);
+      this._auth = window.firebase.auth();
+      this._fs = window.firebase.firestore();
+      this.setState({ backendMode: 'firebase' });
+      this._auth.onAuthStateChanged(u => { if (u && !this.state.uid) this._uidReady(u.uid); });
+      await this._auth.signInAnonymously();
+      return;
+    } catch (e) {
+      console.warn('[Johari] Firebase unavailable → 로컬 모드로 전환합니다.', e && e.message);
+    }
+    this.setState({ backendMode: 'local' });
+    let uid = sessionStorage.getItem('johari_uid');
+    if (!uid) { uid = 'u_' + Math.random().toString(36).slice(2, 9); sessionStorage.setItem('johari_uid', uid); }
+    this._uidReady(uid);
+  }
+
+  _loadFirebase() {
+    return new Promise((res, rej) => {
+      if (window.firebase && window.firebase.firestore) return res();
+      const urls = [
+        'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
+        'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js',
+        'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js'
+      ];
+      let i = 0;
+      const next = () => {
+        if (i >= urls.length) return res();
+        const s = document.createElement('script');
+        s.src = urls[i++]; s.onload = next; s.onerror = () => rej(new Error('script load fail'));
+        document.head.appendChild(s);
+      };
+      next();
+    });
+  }
+
+  async _uidReady(uid) {
+    // 외부 평가 모드인 경우 특별 처리
+    // ready는 _loadExternalEvalData가 세션/참가자 로드에 성공했을 때만 true가 됨
+    // (로드 전에 평가 폼이 빈 이름으로 노출되는 것을 방지)
+    if (this.state.externalEvalMode) {
+      this.setState({ uid }, () => {
+        this._loadExternalEvalData();
+      });
+      return;
+    }
+    
+    let saved;
+    try { saved = JSON.parse(localStorage.getItem('johari_role_v2') || 'null'); } catch (e) {}
+    const patch = { uid, ready: true };
+    if (saved && saved.role) { patch.role = saved.role; patch.slotId = saved.slotId || null; }
+
+    // 이미 입장한 참가자(슬롯 보유)나 관리자는 자기 세션(CODE)에 고정.
+    // 아직 확정 전이면 항상 '최신 세션'을 실시간으로 따라가 관리자가 편집 중인 명단을 본다.
+    const settled = saved && ((saved.role === 'participant' && saved.slotId) || saved.role === 'host');
+    this.setState(patch, () => {
+      if (this.state.backendMode !== 'firebase') { this._refreshLocal(); return; }
+      if (this.CODE && settled) this._subscribeFb();
+      else this._resolveSessionLive();
+    });
+  }
+
+  // 최신 세션을 실시간으로 따라간다. 관리자가 새 세션을 만들거나 세션이 뒤늦게 생겨도
+  // 새로고침 없이 참가자 시작 명단이 최신 세션으로 갱신된다. (입장 확정 시 claimSlot에서 해제)
+  _resolveSessionLive() {
+    if (this._resolveUnsub) return;
+    try {
+      this._resolveUnsub = this._fs.collection('sessions')
+        .orderBy('createdAt', 'desc').limit(1)
+        .onSnapshot(qs => {
+          if (qs.empty) return;               // 아직 세션 없음 → 생기면 다시 호출됨
+          const id = qs.docs[0].id;
+          if (this.CODE === id) return;       // 이미 최신 세션 구독 중
+          // 사용자가 이름을 고르고 코드를 입력하는 중이면 세션을 바꾸지 않는다.
+          // (입력 도중 CODE가 바뀌면 고른 슬롯과 세션이 어긋나 입장 실패)
+          if (this.state.pendingSlotId || this.state.role) return;
+          this.CODE = id;
+          sessionStorage.setItem('johari_session_code', id);
+          this._subscribeFb();                // 최신 세션의 세션/명단 실시간 구독으로 전환
+        }, e => this._fbError(e));
+    } catch (e) { this._fbError(e); }
+  }
+  _stopResolve() { if (this._resolveUnsub) { this._resolveUnsub(); this._resolveUnsub = null; } }
+
+  // ---------- LOCAL ----------
+  _db() { try { return JSON.parse(localStorage.getItem('johari_db_v1') || '{}'); } catch (e) { return {}; } }
+  _saveDb(db) {
+    localStorage.setItem('johari_db_v1', JSON.stringify(db));
+    if (this._chan) this._chan.postMessage({ code: this.CODE });
+    this._refreshLocal();
+  }
+  _refreshLocal() {
+    const d = this._db()[this.CODE];
+    if (!d) { this.setState({ session: null, participants: [], peerVotesByTarget: {} }); this._syncSelf(null); return; }
+    this.setState({ session: d.session, participants: Object.values(d.participants || {}), peerVotesByTarget: d.peerVotes || {} }, () => this._syncSelf(d));
+  }
+  _syncSelf(d) {
+    if (this.state.role !== 'participant' || !this.state.slotId || this.state.selfSel.length) return;
+    const p = d && d.participants && d.participants[this.state.slotId];
+    if (p && p.selfWords && p.selfWords.length) this.setState({ selfSel: p.selfWords.slice() });
+  }
+
+  // ---------- FIREBASE ----------
+  _fbError(e) {
+    if (this._fellBack) return;
+    this._fellBack = true;
+    console.warn('[Johari] Firestore 접근 불가 → 로컬 모드로 동작합니다. (콘솔에서 보안 규칙을 게시하면 실기기 동기화됩니다)', e && e.code);
+    (this._unsubs || []).forEach(f => f && f()); this._unsubs = [];
+    Object.values(this._voteUnsubs || {}).forEach(f => f && f()); this._voteUnsubs = {};
+    this.setState({ backendMode: 'local' }, () => this._refreshLocal());
+  }
+  _subscribeFb() {
+    if (!this.CODE) {
+      console.log('No session code available');
+      return;
+    }
+    (this._unsubs || []).forEach(f => f && f()); this._unsubs = []; this._voteUnsubs = this._voteUnsubs || {};
+    const onErr = (e) => this._fbError(e);
+    const subCode = this.CODE;
+    const ref = this._fs.collection('sessions').doc(subCode);
+    this._unsubs.push(ref.onSnapshot(snap => {
+      // 저장돼 있던 CODE의 세션이 삭제됐다면(존재하지 않음) 최신 세션으로 자동 복구
+      if (!snap.exists) {
+        this.setState({ session: null });
+        if (this.CODE === subCode && this.state.role !== 'host') {
+          this.CODE = ''; sessionStorage.removeItem('johari_session_code');
+          (this._unsubs || []).forEach(f => f && f()); this._unsubs = [];
+          this._resolveSessionLive();
+        }
+        return;
+      }
+      this.setState({ session: snap.data() });
+    }, onErr));
+    this._unsubs.push(ref.collection('participants').onSnapshot(qs => {
+      const list = []; qs.forEach(d => list.push(d.data()));
+      this.setState({ participants: list }, () => {
+        const me = list.find(p => p.id === this.state.slotId);
+        if (this.state.role === 'participant' && me && (me.selfWords || []).length && !this.state.selfSel.length) this.setState({ selfSel: me.selfWords.slice() });
+      });
+      list.forEach(p => {
+        if (this._voteUnsubs[p.id]) return;
+        this._voteUnsubs[p.id] = ref.collection('participants').doc(p.id).collection('peerVotes').onSnapshot(vs => {
+          const m = {}; vs.forEach(v => { m[v.id] = v.data(); });
+          const extN = Object.keys(m).filter(k => k.indexOf('ext_') === 0).length;
+          const prevExtN = Object.keys(this.state.peerVotesByTarget[p.id] || {}).filter(k => k.indexOf('ext_') === 0).length;
+          if (extN !== prevExtN) this._elog(p.name + ' 님이 받은 외부 평가: ' + extN + '건 (실시간 수신됨)');
+          this.setState(st => ({ peerVotesByTarget: Object.assign({}, st.peerVotesByTarget, { [p.id]: m }) }));
+        }, onErr);
+      });
+    }, onErr));
+  }
+
+  _persistRole(role, slotId) { localStorage.setItem('johari_role_v2', JSON.stringify({ role, slotId: slotId || null })); }
+  _genId() { return 's_' + Math.random().toString(36).slice(2, 8); }
+  _toast(m) { this.setState({ toast: m }); clearTimeout(this._tt); this._tt = setTimeout(() => this.setState({ toast: '' }), 2200); }
+  _parseNames(str) { return (str || '').split(/[\n,]+/).map(s => s.trim()).filter(Boolean).filter((v, i, a) => a.indexOf(v) === i); }
+  _parseRoster(str) {
+    return (str || '').split(/\n+/).map(line => {
+      line = line.trim(); if (!line) return null;
+      let name = line, code = '';
+      if (line.indexOf(',') >= 0) { const i = line.indexOf(','); name = line.slice(0, i).trim(); code = line.slice(i + 1).trim(); }
+      else { const m = line.match(/^(.+?)\s+(\S+)$/); if (m) { name = m[1].trim(); code = m[2].trim(); } }
+      return name ? { name, code } : null;
+    }).filter(Boolean).filter((v, i, a) => a.findIndex(x => x.name === v.name) === i);
+  }
+  _clamp(n, lo, hi) { n = parseInt(n, 10); if (isNaN(n)) n = lo; return Math.max(lo, Math.min(hi, n)); }
+
+  // ---------- HOST ----------
+  async createSession() {
+    if (!this.state.adminAuthenticated) { this._toast('먼저 관리자 로그인이 필요합니다.'); return; }
+    const title = (this.state.createTitle || '').trim() || '조하리의 창 실습';
+    const adminCode = '0207';
+    const roster = this._parseRoster(this.state.createNames);
+    if (roster.length === 0) { this._toast('참가자 이름을 한 명 이상 입력해주세요.'); return; }
+    const maxSelf = this._clamp(this.state.createMaxSelf, 1, 15);
+    const maxPeer = this._clamp(this.state.createMaxPeer, 1, 15);
+    
+    // 고유한 세션 ID 생성
+    const sessionId = 'S' + Date.now() + Math.random().toString(36).substr(2, 5).toUpperCase();
+    this.CODE = sessionId;
+    sessionStorage.setItem('johari_session_code', sessionId);
+    
+    const data = { code: sessionId, title, hostUid: this.state.uid, adminCode, adjectivePool: this._poolKo.slice(), minVotes: 1, maxSelfWords: maxSelf, maxPeerWords: maxPeer, createdAt: Date.now() };
+    const docs = roster.map(r => ({ id: this._genId(), name: r.name, birthdayCode: r.code || '', claimedByUid: null, selfWords: [], updatedAt: Date.now() }));
+    this._persistRole('host', null);
+    if (this.state.backendMode === 'firebase') {
+      try {
+        const batch = this._fs.batch();
+        const sref = this._fs.collection('sessions').doc(sessionId);
+        batch.set(sref, data);
+        docs.forEach(d => batch.set(sref.collection('participants').doc(d.id), d));
+        await batch.commit();
+      } catch (e) { this._toast('세션 생성 실패: 권한 규칙을 확인하세요.'); return; }
+      // 새로 만든 세션(this.CODE)으로 실시간 재구독 — 안 하면 이전 세션 데이터에 머무름
+      this._stopResolve();
+      this.setState({ role: 'host', adminViewId: docs[0] ? docs[0].id : null, session: data, participants: docs });
+      this._subscribeFb();
+    } else {
+      const db = this._db(); const pm = {}; docs.forEach(d => pm[d.id] = d);
+      db[this.CODE] = { session: data, participants: pm, peerVotes: {} };
+      this.setState({ role: 'host', adminViewId: docs[0] ? docs[0].id : null });
+      this._saveDb(db);
+    }
+  }
+
+  enterAdmin() {
+    const sess = this.state.session;
+    if (!sess) { this.setState({ adminErr: '세션이 없습니다.' }); return; }
+    if (!this.state.adminAuthenticated) { this.setState({ adminErr: '먼저 관리자 로그인이 필요합니다.' }); return; }
+    this._persistRole('host', null);
+    this.setState({ role: 'host', adminErr: '', adminCodeInput: '', adminViewId: this.state.participants[0] ? this.state.participants[0].id : null });
+  }
+
+  async adminLogin() {
+    if ((this.state.adminCodeInput || '').trim() !== '0207') { 
+      this.setState({ adminErr: '관리자 코드가 일치하지 않아요.' }); 
+      return; 
+    }
+    
+    // 인증 성공 후 기존 세션 찾기
+    this.setState({ adminAuthenticated: true, adminErr: '', adminCodeInput: '' });
+    
+    // Firebase에서 활성 세션 찾기.
+    // where('adminCode')+orderBy 조합은 복합 인덱스가 필요해 인덱스 미배포 시 항상 에러가 났음.
+    // → 인덱스가 필요 없는 orderBy('createdAt')만 사용하고 adminCode는 코드에서 확인한다.
+    if (this.state.backendMode === 'firebase') {
+      try {
+        const sessQuery = await this._fs.collection('sessions')
+          .orderBy('createdAt', 'desc')
+          .limit(5)
+          .get();
+
+        const doc = sessQuery.docs.find(d => (d.data() || {}).adminCode === '0207') || sessQuery.docs[0];
+        if (doc) {
+          this.CODE = doc.id;
+          sessionStorage.setItem('johari_session_code', doc.id);
+          // 세션 구독 시작 (리졸버가 떠 있으면 정리)
+          this._stopResolve();
+          this._subscribeFb();
+        } else {
+          console.log('기존 세션 없음 → 새 세션을 만들 수 있어요.');
+        }
+      } catch (e) {
+        // 진짜 에러(권한/네트워크 등)는 삼키지 말고 표시
+        console.warn('[Johari] 기존 세션 조회 실패:', e && (e.code || e.message || e));
+      }
+    }
+  }
+
+  async resetSession() {
+    if (!window.confirm('현재 세션과 모든 응답을 삭제하고 새로 시작할까요?')) return;
+    if (this.state.backendMode === 'firebase') {
+      try {
+        const sref = this._fs.collection('sessions').doc(this.CODE);
+        const ps = await sref.collection('participants').get();
+        for (const d of ps.docs) {
+          const vs = await d.ref.collection('peerVotes').get();
+          const b = this._fs.batch(); vs.forEach(v => b.delete(v.ref)); b.delete(d.ref); await b.commit();
+        }
+        await sref.delete();
+      } catch (e) { this._toast('초기화 실패.'); return; }
+    } else {
+      const db = this._db(); delete db[this.CODE]; this._saveDb(db);
+    }
+    localStorage.removeItem('johari_role_v2');
+    sessionStorage.removeItem('johari_session_code');
+    this.CODE = '';
+    this.setState({ role: null, slotId: null, adminCodeInput: '', adminErr: '', adminAuthenticated: false, landingTab: 'admin', createTitle: '', createNames: '', adminViewId: null });
+  }
+
+  async addName() {
+    const name = (this.state.newName || '').trim();
+    if (!name) return;
+    const code = (this.state.newCode || '').trim();
+    const doc = { id: this._genId(), name, birthdayCode: code, claimedByUid: null, selfWords: [], updatedAt: Date.now() };
+    this.setState({ newName: '', newCode: '' });
+    if (this.state.backendMode === 'firebase') {
+      try { await this._fs.collection('sessions').doc(this.CODE).collection('participants').doc(doc.id).set(doc); } catch (e) { this._toast('추가 실패.'); }
+    } else {
+      const db = this._db(); if (!db[this.CODE]) return; db[this.CODE].participants[doc.id] = doc; this._saveDb(db);
+    }
+    this._toast(name + ' 님을 추가했어요.');
+  }
+
+  // ---------- PARTICIPANT ----------
+  pickNameForEntry(slotId) { this.setState({ pendingSlotId: slotId, codeInput: '', codeErr: '' }); }
+  cancelEntry() { this.setState({ pendingSlotId: null, codeInput: '', codeErr: '' }); }
+  submitCode() {
+    const slot = this.state.participants.find(p => p.id === this.state.pendingSlotId);
+    // 명단이 아직 동기화되지 않았을 수 있으므로, 슬롯을 못 찾으면 초기화 대신 안내
+    if (!slot) { this.setState({ codeErr: '명단을 불러오는 중이에요. 잠시 후 다시 시도해주세요.' }); return; }
+    const need = (slot.birthdayCode || '').trim();
+    if (need && (this.state.codeInput || '').trim() !== need) { this.setState({ codeErr: '생일코드가 일치하지 않아요.' }); return; }
+    this.claimSlot(slot.id);
+  }
+  async claimSlot(slotId) {
+    const uid = this.state.uid;
+    const slot = this.state.participants.find(r => r.id === slotId);
+    const initSelf = slot && slot.selfWords ? slot.selfWords.slice() : [];
+
+    // 쓰기(입장)를 먼저 시도하고, 성공했을 때만 역할을 확정한다.
+    // (실패했는데 역할을 미리 저장/리졸버를 꺼버리면 재시도가 영영 복구되지 않던 버그 방지)
+    if (this.state.backendMode === 'firebase') {
+      if (!this.CODE) { this.setState({ codeErr: '세션 정보를 불러오는 중이에요. 잠시 후 다시 시도해주세요.' }); return; }
+      if (!uid) { this.setState({ codeErr: '연결 준비 중이에요. 잠시 후 다시 시도해주세요.' }); return; }
+      try {
+        await this._fs.collection('sessions').doc(this.CODE)
+          .collection('participants').doc(slotId)
+          .set({ claimedByUid: uid, updatedAt: Date.now() }, { merge: true });
+      } catch (e) {
+        console.warn('[Johari] 입장 실패:', e && (e.code || e.message || e));
+        this.setState({ codeErr: '입장에 실패했어요. 다시 시도해주세요.' });
+        return;
+      }
+    } else {
+      const db = this._db();
+      if (!db[this.CODE] || !db[this.CODE].participants[slotId]) { this.setState({ codeErr: '세션 정보를 찾을 수 없어요. 새로고침 후 다시 시도해주세요.' }); return; }
+      db[this.CODE].participants[slotId].claimedByUid = uid; this._saveDb(db);
+    }
+
+    // 여기까지 왔으면 성공 → 이제 확정
+    this._persistRole('participant', slotId);
+    this._stopResolve(); // 입장 확정 → 이 세션(CODE)에 고정, 최신 세션 추적 중단
+    this.setState({ role: 'participant', slotId, participantTab: 'self', selfSel: initSelf, pendingSlotId: null, codeInput: '', codeErr: '' });
+  }
+
+  toggleSelf(w) {
+    const max = (this.state.session && this.state.session.maxSelfWords) || 5;
+    let sel = this.state.selfSel.slice();
+    if (sel.includes(w)) sel = sel.filter(x => x !== w);
+    else { if (sel.length >= max) { this._toast(`최대 ${max}개까지 선택할 수 있어요.`); return; } sel.push(w); }
+    this.setState({ selfSel: sel });
+  }
+  async saveSelf() {
+    const id = this.state.slotId, words = this.state.selfSel.slice();
+    if (this.state.backendMode === 'firebase') {
+      try { await this._fs.collection('sessions').doc(this.CODE).collection('participants').doc(id).set({ selfWords: words, updatedAt: Date.now() }, { merge: true }); }
+      catch (e) { this._toast('저장 실패.'); return; }
+    } else {
+      const db = this._db(); if (!db[this.CODE]) return;
+      db[this.CODE].participants[id] = Object.assign({}, db[this.CODE].participants[id], { selfWords: words, updatedAt: Date.now() });
+      this._saveDb(db);
+    }
+    this._toast('자기평가가 저장되었어요.');
+    this.setState({ participantTab: 'peer' });
+  }
+
+  pickTarget(id) {
+    const v = this.state.peerVotesByTarget[id]; const ex = v && v[this.state.slotId];
+    this.setState({ peerTargetId: id, peerSel: ex && ex.words ? ex.words.slice() : [] });
+  }
+  clearTarget() { this.setState({ peerTargetId: null, peerSel: [] }); }
+  togglePeer(w) {
+    const max = (this.state.session && this.state.session.maxPeerWords) || 5;
+    let sel = this.state.peerSel.slice();
+    if (sel.includes(w)) sel = sel.filter(x => x !== w);
+    else { if (sel.length >= max) { this._toast(`최대 ${max}개까지 선택할 수 있어요.`); return; } sel.push(w); }
+    this.setState({ peerSel: sel });
+  }
+  async submitPeer() {
+    const voter = this.state.slotId, target = this.state.peerTargetId, words = this.state.peerSel.slice();
+    if (!target || words.length === 0) { this._toast('형용사를 1개 이상 선택해주세요.'); return; }
+    const me = this.state.participants.find(p => p.id === voter);
+    const vote = { voterSlotId: voter, voterName: me ? me.name : '', targetSlotId: target, words, updatedAt: Date.now() };
+    if (this.state.backendMode === 'firebase') {
+      try { await this._fs.collection('sessions').doc(this.CODE).collection('participants').doc(target).collection('peerVotes').doc(voter).set(vote); }
+      catch (e) { this._toast('제출 실패.'); return; }
+    } else {
+      const db = this._db(); if (!db[this.CODE]) return;
+      db[this.CODE].peerVotes = db[this.CODE].peerVotes || {};
+      db[this.CODE].peerVotes[target] = db[this.CODE].peerVotes[target] || {};
+      db[this.CODE].peerVotes[target][voter] = vote;
+      this._saveDb(db);
+    }
+    this.setState({ peerTargetId: null, peerSel: [] });
+    this._toast('평가가 제출되었어요.');
+  }
+
+  exitSession() {
+    localStorage.removeItem('johari_role_v2');
+    sessionStorage.removeItem('johari_session_code');
+    this.CODE = '';
+    this.setState({ role: null, slotId: null, participantTab: 'self', selfSel: [], peerTargetId: null, peerSel: [], adminCodeInput: '', adminErr: '', newName: '', adminAuthenticated: false });
+    // 세션 구독 해제
+    (this._unsubs || []).forEach(f => f && f()); 
+    this._unsubs = [];
+    Object.values(this._voteUnsubs || {}).forEach(f => f && f()); 
+    this._voteUnsubs = {};
+  }
+
+  // ---------- 외부 평가 ----------
+  async _loadExternalEvalData() {
+    const { evalSessionCode, evalTargetId } = this.state;
+    this._elog('평가 데이터 로드 시작', { evalSessionCode, evalTargetId, backendMode: this.state.backendMode });
+
+    if (!evalSessionCode || !evalTargetId) {
+      console.error('Missing eval parameters');
+      this._elog('실패: session/target 파라미터 누락');
+      this._toast('잘못된 링크입니다.');
+      return;
+    }
+
+    if (this.state.backendMode === 'firebase') {
+      try {
+        // evalSessionCode는 세션 ID여야 함 (관리자 코드가 아님)
+        // 세션 ID로 직접 접근 시도
+        const sessionDoc = await this._fs.collection('sessions').doc(evalSessionCode).get();
+        this._elog('1차 조회: sessions/' + evalSessionCode, sessionDoc.exists ? '존재함 (세션 ID로 직접 매칭)' : '없음 → adminCode로 재검색');
+
+        if (!sessionDoc.exists) {
+          // 세션을 찾을 수 없으면 관리자 코드로 검색
+          const sessQuery = await this._fs.collection('sessions')
+            .where('adminCode', '==', evalSessionCode)
+            .limit(1)
+            .get();
+
+          if (sessQuery.empty) {
+            this._elog('실패: 세션 ID로도, adminCode로도 세션을 찾지 못함');
+            this._toast('세션을 찾을 수 없습니다.');
+            return;
+          }
+
+          const sessionId = sessQuery.docs[0].id;
+          const sessionData = sessQuery.docs[0].data();
+          this._elog('adminCode로 세션 발견. 실제 세션 ID:', sessionId);
+
+          // 참가자 정보 가져오기
+          const targetDoc = await this._fs.collection('sessions').doc(sessionId)
+            .collection('participants').doc(evalTargetId).get();
+
+          if (!targetDoc.exists) {
+            this._elog('실패: 참가자 문서 없음 — sessions/' + sessionId + '/participants/' + evalTargetId);
+            this._toast('참가자를 찾을 수 없습니다.');
+            return;
+          }
+
+          const targetData = targetDoc.data();
+          this._elog('로드 완료. 평가 대상:', targetData.name);
+          this.setState({
+            evalTargetName: targetData.name,
+            session: sessionData,
+            sessionId: sessionId,
+            ready: true
+          });
+        } else {
+          // 세션 ID로 직접 찾은 경우
+          const sessionData = sessionDoc.data();
+          
+          // 참가자 정보 가져오기
+          const targetDoc = await this._fs.collection('sessions').doc(evalSessionCode)
+            .collection('participants').doc(evalTargetId).get();
+          
+          if (!targetDoc.exists) {
+            this._elog('실패: 참가자 문서 없음 — sessions/' + evalSessionCode + '/participants/' + evalTargetId);
+            this._toast('참가자를 찾을 수 없습니다.');
+            return;
+          }
+
+          const targetData = targetDoc.data();
+          this._elog('로드 완료. 평가 대상:', targetData.name);
+          this.setState({
+            evalTargetName: targetData.name,
+            session: sessionData,
+            sessionId: evalSessionCode,
+            ready: true
+          });
+        }
+      } catch (e) {
+        console.error('외부 평가 데이터 로드 실패:', e);
+        this._elog('실패: Firestore 조회 중 예외 발생 (네트워크 또는 보안 규칙 문제일 수 있음)', e.code || '', e.message || e);
+        this._toast('데이터를 불러올 수 없습니다.');
+      }
+    } else {
+      // Local storage mode
+      const db = this._db();
+      const sessionData = db[evalSessionCode];
+      
+      if (!sessionData) {
+        this._toast('세션을 찾을 수 없습니다.');
+        return;
+      }
+      
+      const participant = sessionData.participants && sessionData.participants[evalTargetId];
+      
+      if (!participant) {
+        this._toast('참가자를 찾을 수 없습니다.');
+        return;
+      }
+      
+      this.setState({
+        evalTargetName: participant.name,
+        session: sessionData.session,
+        sessionId: evalSessionCode,
+        ready: true
+      });
+    }
+  }
+
+  toggleExternalWord(w) {
+    const max = (this.state.session && this.state.session.maxPeerWords) || 5;
+    let sel = this.state.externalWords.slice();
+    if (sel.includes(w)) {
+      sel = sel.filter(x => x !== w);
+    } else {
+      if (sel.length >= max) {
+        this._toast(`최대 ${max}개까지 선택할 수 있어요.`);
+        return;
+      }
+      sel.push(w);
+    }
+    this.setState({ externalWords: sel });
+  }
+
+  generateShareLink() {
+    const baseUrl = window.location.origin + window.location.pathname;
+    const shareUrl = `${baseUrl}?eval=true&session=${this.CODE}&target=${this.state.slotId}`;
+    
+    this.setState({ shareLink: shareUrl, showShareModal: true });
+  }
+
+  copyShareLink() {
+    navigator.clipboard.writeText(this.state.shareLink).then(() => {
+      this._toast('링크가 복사되었습니다.');
+    });
+  }
+
+  closeShareModal() {
+    this.setState({ showShareModal: false });
+  }
+  
+  async submitExternalEval() {
+    const { evalSessionCode, evalTargetId, externalWords, evalTargetName, sessionId } = this.state;
+    this._elog('제출 시작', { evalSessionCode, sessionId, evalTargetId, words: externalWords, backendMode: this.state.backendMode });
+
+    // 세션/참가자 데이터가 로드되지 않은 상태의 제출 차단
+    // (없는 세션 경로에 고아 투표 문서가 생성되는 것을 방지)
+    if (!evalTargetName || !this.state.session) {
+      this._elog('중단: 평가 대상 데이터 미로드 상태에서 제출 시도 — 링크의 session/target 확인 필요');
+      this._toast('평가 대상 정보를 불러오지 못했습니다. 링크를 다시 확인해주세요.');
+      return;
+    }
+
+    // Check for duplicate vote
+    const voteKey = `external_vote_${evalSessionCode}_${evalTargetId}`;
+    if (localStorage.getItem(voteKey)) {
+      this._elog('중단: 이 브라우저에서 이미 제출한 기록 있음 (localStorage 키: ' + voteKey + ')');
+      this._toast('이미 평가를 완료하셨습니다.');
+      return;
+    }
+
+    if (!externalWords.length) {
+      this._toast('최소 1개 이상의 형용사를 선택해주세요.');
+      return;
+    }
+
+    if (this.state.backendMode === 'firebase') {
+      try {
+        // sessionId가 없으면 evalSessionCode 사용 (이미 세션 ID인 경우)
+        const sessId = sessionId || evalSessionCode;
+
+        // Generate external voter ID
+        const extVoterId = 'ext_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        this._elog('Firestore 저장 경로: sessions/' + sessId + '/participants/' + evalTargetId + '/peerVotes/' + extVoterId);
+
+        // Save vote
+        await this._fs.collection('sessions').doc(sessId)
+          .collection('participants').doc(evalTargetId)
+          .collection('peerVotes').doc(extVoterId)
+          .set({
+            fromId: extVoterId,
+            words: externalWords,
+            timestamp: new Date().toISOString()
+          });
+
+        // Mark as voted in localStorage
+        localStorage.setItem(voteKey, 'true');
+        this._elog('제출 성공 → 완료 화면 표시');
+
+        // Show completion message
+        this.setState({
+          externalEvalCompleted: true
+        });
+      } catch (err) {
+        console.error('Error submitting external eval:', err);
+        this._elog('제출 실패: Firestore 쓰기 예외 (보안 규칙이 peerVotes 쓰기를 허용하는지 확인 필요)', err.code || '', err.message || err);
+        this._toast('평가 제출 중 오류가 발생했습니다.');
+      }
+    } else {
+      // Local storage mode
+      const db = this._db();
+      const sessionData = db[evalSessionCode];
+      
+      if (!sessionData) {
+        this._toast('세션을 찾을 수 없습니다.');
+        return;
+      }
+      
+      // Generate external voter ID
+      const extVoterId = 'ext_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      
+      // Save vote in local storage
+      if (!sessionData.peerVotes) sessionData.peerVotes = {};
+      if (!sessionData.peerVotes[evalTargetId]) sessionData.peerVotes[evalTargetId] = {};
+      
+      sessionData.peerVotes[evalTargetId][extVoterId] = {
+        fromId: extVoterId,
+        words: externalWords,
+        timestamp: new Date().toISOString()
+      };
+      
+      this._saveDb(db);
+      
+      // Mark as voted in localStorage
+      localStorage.setItem(voteKey, 'true');
+      
+      // Show completion message
+      this._elog('로컬 모드 제출 완료', { extVoterId, words: externalWords });
+      this.setState({
+        externalEvalCompleted: true
+      });
+    }
+  }
+
+  // 외부 평가 흐름 전용 로그 (콘솔에서 [외부평가] 접두사로 확인)
+  _elog(...args) {
+    console.log('%c[외부평가]', 'color:#C2714F;font-weight:bold;', ...args);
+  }
+
+  seedDemo() {
+    // 데모 세션 안내
+    const demoInfo = `
+🎯 조하리의 창 실습 가이드
+
+1. 관리자 코드 '0207'로 로그인
+2. 세션 만들기
+3. 참가자 등록 (예: 김홍윤 0312, 박민수 1105...)
+4. 참가자들이 자기평가 → 타인평가 진행
+5. 결과 확인
+
+데모로 시작하려면:
+- 세션 제목: PTSTAR 팀 실습
+- 참가자 예시:
+  김홍윤 0312
+  박민수 1105
+  이지민 0728
+  최예원 0429
+    `;
+    
+    alert(demoInfo);
+    
+    // 관리자 로그인 화면으로 이동
+    this.setState({ 
+      landingTab: 'admin',
+      adminAuthenticated: false,
+      adminCodeInput: '',
+      createTitle: 'PTSTAR 팀 실습',
+      createNames: '김홍윤 0312\n박민수 1105\n이지민 0728\n최예원 0429'
+    });
+    
+    this._toast('관리자 코드 0207을 입력하여 시작하세요.');
+  }
+
+  _computeResult(slotId) {
+    const sess = this.state.session;
+    const pool = (sess && sess.adjectivePool) || this._poolKo;
+    const minV = 1; // 타인 1명만 골라도 '남이 아는' 영역으로 집계 (기존 세션의 minVotes 값 무시)
+    const p = this.state.participants.find(x => x.id === slotId);
+    const selfSet = new Set((p && p.selfWords) || []);
+    const votes = this.state.peerVotesByTarget[slotId] || {};
+    const counts = {};
+    Object.values(votes).forEach(v => (v.words || []).forEach(w => { counts[w] = (counts[w] || 0) + 1; }));
+    const otherSet = new Set(Object.keys(counts).filter(w => counts[w] >= minV));
+    const mk = arr => arr.map(w => ({ word: w, count: counts[w] || 0, countLabel: (counts[w] || 0) > 0 ? `${counts[w]}명` : '' }));
+    return {
+      open: mk(pool.filter(w => selfSet.has(w) && otherSet.has(w))),
+      hidden: mk(pool.filter(w => selfSet.has(w) && !otherSet.has(w))),
+      blind: mk(pool.filter(w => !selfSet.has(w) && otherSet.has(w))),
+      unknown: mk(pool.filter(w => !selfSet.has(w) && !otherSet.has(w)))
+    };
+  }
+
+  // ---------- 결과 이미지 저장 ----------
+  // 화면 DOM(중첩 dc-import) 캡처 대신, 결과 데이터를 캔버스에 직접 그려 PNG로 내려받는다.
+  // 외부 라이브러리 의존이 없어 어떤 환경에서도 동일하게 동작한다.
+  saveResultImage(slotId) {
+    const target = this.state.participants.find(x => x.id === slotId);
+    if (!target) { this._toast('저장할 결과가 없어요.'); return; }
+    const name = target.name || '';
+    const res = this._computeResult(slotId);
+
+    const KO = "'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR','Nanum Gothic',sans-serif";
+    const SERIF = "'Gowun Batang','Nanum Myeongjo',serif";
+    const quads = [
+      { items: res.open,    title: '열린 영역',       sub: '나도 알고 남도 아는 나',   bg: '#E7EBDF', border: '#C7D0B6', tc: '#4E5B3B', sc: '#7A8466', cbd: '#D6DEC8', ct: '#3F4A30', cc: '#8A9472', showCount: true },
+      { items: res.hidden,  title: '숨겨진 영역',     sub: '나는 알지만 덜 드러난 나', bg: '#ECE6F1', border: '#D2C9DF', tc: '#5E5280', sc: '#897CA5', cbd: '#DBD3E6', ct: '#4C4470', cc: '#9286B0', showCount: true },
+      { items: res.blind,   title: '보이지 않는 영역', sub: '나는 몰랐지만 남이 보는 나', bg: '#F4E5D8', border: '#E4C8B0', tc: '#9C5A36', sc: '#B98763', cbd: '#EAD2BD', ct: '#8A4F30', cc: '#B98763', showCount: true },
+      { items: res.unknown, title: '미지의 영역',     sub: '아직 탐색되지 않은 가능성', bg: '#ECE7DD', border: '#D9CFBE', tc: '#7C6E54', sc: '#A2937A', cbd: '#E0D6C5', ct: '#6E624C', cc: '#A2937A', showCount: false }
+    ];
+
+    // 논리 좌표(1x) 기준 레이아웃
+    const W = 860, PAD = 32, LABEL_W = 74, GAP = 10;
+    const quadW = (W - PAD * 2 - LABEL_W - GAP * 2) / 2;
+    const QPAD = 15, PH = 26, PILL_GAP = 7, MIN_QUAD_H = 150;
+    const TITLE_BLOCK = 22, TITLE_TO_PILLS = 12;
+
+    // 측정용 임시 컨텍스트
+    const meas = document.createElement('canvas').getContext('2d');
+    const layoutPills = (items, showCount) => {
+      const innerW = quadW - QPAD * 2;
+      const pills = items.map(it => {
+        meas.font = '500 13px ' + KO;
+        const wWord = meas.measureText(it.word).width;
+        let wCount = 0;
+        const label = showCount ? (it.countLabel || '') : '';
+        if (label) { meas.font = '600 10px ' + KO; wCount = meas.measureText(label).width; }
+        return { word: it.word, label, wWord, wCount, pillW: 11 + wWord + (wCount ? 5 + wCount : 0) + 11 };
+      });
+      const rows = []; let cur = [], x = 0;
+      pills.forEach(p => {
+        if (cur.length && x + p.pillW > innerW) { rows.push(cur); cur = []; x = 0; }
+        cur.push(p); x += p.pillW + PILL_GAP;
+      });
+      if (cur.length) rows.push(cur);
+      const pillsH = rows.length ? rows.length * PH + (rows.length - 1) * (PILL_GAP - 1) : 22;
+      return { rows, pillsH, empty: items.length === 0 };
+    };
+
+    quads.forEach(q => { q.layout = layoutPills(q.items, q.showCount); q.contentH = QPAD + TITLE_BLOCK + TITLE_TO_PILLS + q.layout.pillsH + QPAD; });
+    const row1H = Math.max(MIN_QUAD_H, quads[0].contentH, quads[1].contentH);
+    const row2H = Math.max(MIN_QUAD_H, quads[2].contentH, quads[3].contentH);
+
+    const HEADER_H = 96;   // 상단 제목 영역
+    const COLHDR_H = 26;   // 남이 아는/모르는 나
+    const ROW_GAP = 10;
+    const FOOTER_H = 40;
+    const H = HEADER_H + COLHDR_H + row1H + ROW_GAP + row2H + FOOTER_H;
+
+    // 실제 캔버스 (2x 고해상도)
+    const DPR = 2;
+    const canvas = document.createElement('canvas');
+    canvas.width = W * DPR; canvas.height = H * DPR;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(DPR, DPR);
+    ctx.textBaseline = 'alphabetic';
+
+    // 배경
+    ctx.fillStyle = '#FBF7F0'; ctx.fillRect(0, 0, W, H);
+
+    const rr = (x, y, w, h, r) => {
+      const rad = Math.min(r, w / 2, h / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + rad, y);
+      ctx.arcTo(x + w, y, x + w, y + h, rad);
+      ctx.arcTo(x + w, y + h, x, y + h, rad);
+      ctx.arcTo(x, y + h, x, y, rad);
+      ctx.arcTo(x, y, x + w, y, rad);
+      ctx.closePath();
+    };
+
+    // 상단 제목
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#2B2622';
+    ctx.font = '700 26px ' + SERIF;
+    ctx.fillText((name || '이름') + ' 님의 조하리의 창', PAD, HEADER_H - 42);
+    ctx.fillStyle = '#A89B89';
+    ctx.font = '500 13px ' + KO;
+    const sessTitle = (this.state.session && this.state.session.title) ? this.state.session.title : 'PTSTAR 조하리의 창';
+    ctx.fillText(sessTitle, PAD, HEADER_H - 20);
+
+    // 열 헤더
+    const col1X = PAD + LABEL_W + GAP;
+    const col2X = col1X + quadW + GAP;
+    const colHdrY = HEADER_H + COLHDR_H - 9;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#8C8378';
+    ctx.font = '600 12px ' + KO;
+    ctx.fillText('남이 아는 나', col1X + quadW / 2, colHdrY);
+    ctx.fillText('남이 모르는 나', col2X + quadW / 2, colHdrY);
+
+    const row1Y = HEADER_H + COLHDR_H;
+    const row2Y = row1Y + row1H + ROW_GAP;
+
+    // 행 라벨
+    ctx.fillStyle = '#8C8378';
+    ctx.font = '600 12px ' + KO;
+    ctx.textAlign = 'center';
+    const rowLabel = (text1, text2, cx, cy) => { ctx.fillText(text1, cx, cy - 8); ctx.fillText(text2, cx, cy + 9); };
+    rowLabel('내가', '아는 나', PAD + LABEL_W / 2, row1Y + row1H / 2);
+    rowLabel('내가', '모르는 나', PAD + LABEL_W / 2, row2Y + row2H / 2);
+
+    const drawQuad = (q, x, y, w, h) => {
+      // 배경
+      ctx.fillStyle = q.bg; ctx.strokeStyle = q.border; ctx.lineWidth = 1;
+      rr(x, y, w, h, 14); ctx.fill(); ctx.stroke();
+      // 제목 + 부제
+      ctx.textAlign = 'left';
+      ctx.fillStyle = q.tc; ctx.font = '700 16px ' + SERIF;
+      const titleY = y + QPAD + 15;
+      ctx.fillText(q.title, x + QPAD, titleY);
+      const tW = ctx.measureText(q.title).width;
+      ctx.fillStyle = q.sc; ctx.font = '500 11px ' + KO;
+      ctx.fillText(q.sub, x + QPAD + tW + 8, titleY);
+      // 칩
+      let py = y + QPAD + TITLE_BLOCK + TITLE_TO_PILLS;
+      if (q.layout.empty) {
+        ctx.fillStyle = q.sc; ctx.font = '500 13px ' + KO;
+        ctx.fillText('아직 없어요', x + QPAD, py + 15);
+        return;
+      }
+      q.layout.rows.forEach(row => {
+        let px = x + QPAD;
+        row.forEach(p => {
+          ctx.fillStyle = '#ffffff'; ctx.strokeStyle = q.cbd; ctx.lineWidth = 1;
+          rr(px, py, p.pillW, PH, 13); ctx.fill(); ctx.stroke();
+          ctx.textAlign = 'left';
+          ctx.fillStyle = q.ct; ctx.font = '500 13px ' + KO;
+          ctx.fillText(p.word, px + 11, py + 17);
+          if (p.label) {
+            ctx.fillStyle = q.cc; ctx.font = '600 10px ' + KO;
+            ctx.fillText(p.label, px + 11 + p.wWord + 5, py + 17);
+          }
+          px += p.pillW + PILL_GAP;
+        });
+        py += PH + (PILL_GAP - 1);
+      });
+    };
+
+    drawQuad(quads[0], col1X, row1Y, quadW, row1H);
+    drawQuad(quads[1], col2X, row1Y, quadW, row1H);
+    drawQuad(quads[2], col1X, row2Y, quadW, row2H);
+    drawQuad(quads[3], col2X, row2Y, quadW, row2H);
+
+    // 푸터
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#B6AB9B'; ctx.font = '500 11px ' + KO;
+    let stamp = '';
+    try { stamp = new Date().toLocaleDateString('ko-KR'); } catch (e) {}
+    ctx.fillText('PTSTAR · 조하리의 창' + (stamp ? '  ·  ' + stamp : ''), W - PAD, H - 16);
+
+    // 다운로드
+    const finish = (url, revoke) => {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = '조하리의창_' + (name || '결과') + '.png';
+      document.body.appendChild(a); a.click(); a.remove();
+      if (revoke) setTimeout(() => URL.revokeObjectURL(url), 1000);
+      this._toast('이미지를 저장했어요.');
+    };
+    if (canvas.toBlob) {
+      canvas.toBlob(blob => {
+        if (!blob) { finish(canvas.toDataURL('image/png'), false); return; }
+        finish(URL.createObjectURL(blob), true);
+      }, 'image/png');
+    } else {
+      finish(canvas.toDataURL('image/png'), false);
+    }
+  }
+
+  // ---------- STYLES ----------
+  _chip(sel) {
+    const base = { display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: '3px', padding: '9px 14px', borderRadius: '14px', border: '1.5px solid', cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' };
+    return sel
+      ? Object.assign({}, base, { borderColor: '#C2714F', background: '#F3E1D4', color: '#A85737', fontWeight: 600 })
+      : Object.assign({}, base, { borderColor: '#E2D9CC', background: '#FCF9F3', color: '#5B544C', fontWeight: 500 });
+  }
+  _tabStyle(active) {
+    const base = { flex: 1, padding: '11px', borderRadius: '11px', border: 'none', cursor: 'pointer', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, transition: 'all .15s' };
+    return active ? Object.assign({}, base, { background: '#fff', color: '#2B2622', boxShadow: '0 1px 3px rgba(43,38,34,.1)' }) : Object.assign({}, base, { background: 'transparent', color: '#9A8F7F' });
+  }
+  _targetCard(done) {
+    const base = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '12px 14px', borderRadius: '14px', border: '1.5px solid', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', transition: 'all .15s' };
+    return done ? Object.assign({}, base, { background: '#EEF1E8', borderColor: '#CDD6BD' }) : Object.assign({}, base, { background: '#FCF9F3', borderColor: '#EAE1D3' });
+  }
+  _pickCard() {
+    return { display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '11px 13px', borderRadius: '13px', border: '1.5px solid #EAE1D3', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', transition: 'all .15s', background: '#fff' };
+  }
+  _adminRow(active) {
+    const base = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', width: '100%', padding: '9px 11px', borderRadius: '11px', border: '1px solid', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', transition: 'all .12s' };
+    return active ? Object.assign({}, base, { background: '#F3E1D4', borderColor: '#E4C8B0', color: '#A85737' }) : Object.assign({}, base, { background: 'transparent', borderColor: 'transparent', color: '#2B2622' });
+  }
+  _miniChip(on, onColors) {
+    const base = { fontSize: '11px', fontWeight: 600, borderRadius: '999px', padding: '3px 8px', whiteSpace: 'nowrap' };
+    return on ? Object.assign({}, base, { background: onColors[0], color: onColors[1] }) : Object.assign({}, base, { background: '#EFE7D9', color: '#BCB0A0' });
+  }
+  _rolePill(role) {
+    const c = role === 'host' ? ['#E7EBDF', '#5E6B4B'] : ['#F3E1D4', '#A85737'];
+    return { background: c[0], color: c[1], padding: '4px 11px', borderRadius: '999px', fontSize: '12px', fontWeight: 600 };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const sess = s.session;
+    const isHost = s.role === 'host';
+    const isParticipant = s.role === 'participant';
+    const inSession = !!s.role;
+    const pool = (sess && sess.adjectivePool) || this._poolKo;
+
+    // 외부 평가 모드 체크
+    const v_external = s.externalEvalMode && s.ready;
+    const v_loading = !s.ready;
+    const v_landing = s.ready && !s.role && !s.externalEvalMode;
+    const v_admin = s.ready && isHost;
+    const v_participant = s.ready && isParticipant;
+
+    const sessionExists = !!sess;
+    const pTab = s.participantTab;
+    const pSelf = v_participant && pTab === 'self';
+    const inPeer = v_participant && pTab === 'peer';
+    const pPeerPick = inPeer && !s.peerTargetId;
+    const pPeerEval = inPeer && !!s.peerTargetId;
+    const pResult = v_participant && pTab === 'result';
+
+    const selfChips = pool.map(w => ({ word: w, en: this._enMap[w] || '', style: this._chip(s.selfSel.includes(w)), onClick: () => this.toggleSelf(w) }));
+    const selfCount = s.selfSel.length;
+    const maxSelf = (sess && sess.maxSelfWords) || 5;
+
+    const mySlot = s.participants.find(p => p.id === s.slotId);
+    const myName = mySlot ? mySlot.name : '';
+
+    const peerTargets = s.participants.filter(p => p.id !== s.slotId).map(p => {
+      const done = !!(s.peerVotesByTarget[p.id] && s.peerVotesByTarget[p.id][s.slotId]);
+      return {
+        id: p.id, name: p.name, initial: (p.name || '?').slice(-2),
+        onPick: () => this.pickTarget(p.id), style: this._targetCard(done),
+        badge: done ? '평가 완료 · 수정' : '평가하기',
+        badgeStyle: done
+          ? { fontSize: '12px', fontWeight: 600, color: '#5E6B4B', background: '#DCE4CF', borderRadius: '999px', padding: '5px 11px' }
+          : { fontSize: '12px', fontWeight: 600, color: '#A85737', background: '#F3E1D4', borderRadius: '999px', padding: '5px 11px' }
+      };
+    });
+    const tp = s.participants.find(x => x.id === s.peerTargetId);
+    const targetName = tp ? tp.name : '';
+    const peerChips = pool.map(w => ({ word: w, en: this._enMap[w] || '', style: this._chip(s.peerSel.includes(w)), onClick: () => this.togglePeer(w) }));
+    const peerCount = s.peerSel.length;
+    const maxPeer = (sess && sess.maxPeerWords) || 5;
+    const peerDoneCount = peerTargets.filter(t => t.badge.indexOf('완료') >= 0).length;
+
+    const pickRoster = s.participants.map(r => ({ id: r.id, name: r.name, initial: (r.name || '?').slice(-2), claimed: !!r.claimedByUid, style: this._pickCard(), onPick: () => this.pickNameForEntry(r.id) }));
+    const pendingSlot = s.participants.find(p => p.id === s.pendingSlotId);
+
+    const resultTargetId = isHost ? s.adminViewId : s.slotId;
+    const rt = s.participants.find(x => x.id === resultTargetId);
+    const resultName = rt ? rt.name : '';
+    const res = resultTargetId ? this._computeResult(resultTargetId) : { open: [], hidden: [], blind: [], unknown: [] };
+    const notEval = resultTargetId ? s.participants.filter(t => t.id !== resultTargetId && !(s.peerVotesByTarget[t.id] && s.peerVotesByTarget[t.id][resultTargetId])) : [];
+
+    const total = s.participants.length;
+    const others = Math.max(total - 1, 0);
+    const joinedCount = s.participants.filter(p => !!p.claimedByUid).length;
+    const selfDone = s.participants.filter(p => (p.selfWords || []).length > 0).length;
+    // 외부 평가(ext_ 접두사 투표) 수신 건수 — 참가자별 / 전체
+    const extCountFor = (pid) => Object.keys(s.peerVotesByTarget[pid] || {}).filter(k => k.indexOf('ext_') === 0).length;
+    const extTotal = s.participants.reduce((n, p) => n + extCountFor(p.id), 0);
+    const adminRoster = s.participants.map(p => {
+      const active = p.id === s.adminViewId;
+      const claimed = !!p.claimedByUid;
+      const sd = (p.selfWords || []).length > 0;
+      const given = s.participants.filter(t => t.id !== p.id && s.peerVotesByTarget[t.id] && s.peerVotesByTarget[t.id][p.id]).length;
+      const extN = extCountFor(p.id);
+      return {
+        id: p.id, name: p.name, initial: (p.name || '?').slice(-2), given, others,
+        codeLabel: p.birthdayCode ? ('생일코드 ' + p.birthdayCode) : '코드 없음',
+        rowStyle: this._adminRow(active),
+        joinChip: this._miniChip(claimed, ['#E7EBDF', '#5E6B4B']),
+        selfChip: this._miniChip(sd, ['#F3E1D4', '#A85737']),
+        peerChipStyle: this._miniChip(given >= others && others > 0, ['#E9E4EF', '#6B5E86']),
+        extCount: extN,
+        extChip: this._miniChip(extN > 0, ['#EDE4F5', '#6B5B85']),
+        onView: () => this.setState({ adminViewId: p.id })
+      };
+    });
+
+    const roster = this._parseRoster(s.createNames);
+
+    return {
+      v_loading, v_landing, v_admin, v_participant,
+      inSession, roleLabel: isHost ? '관리자' : '참가자', rolePillStyle: this._rolePill(s.role),
+      onExit: () => this.exitSession(), exitHover: { background: '#F1E9DC' },
+      sessionTitle: sess ? sess.title : '',
+      adminCode: '0207',
+
+      isPartTab: s.landingTab === 'participant', isAdminTab: s.landingTab === 'admin',
+      setPartTab: () => this.setState({ landingTab: 'participant' }), setAdminTab: () => this.setState({ landingTab: 'admin', adminErr: '' }),
+      partTabStyle: this._tabStyle(s.landingTab === 'participant'), adminTabStyle: this._tabStyle(s.landingTab === 'admin'),
+      pickRoster, pickEmpty: pickRoster.length === 0,
+      pickListMode: s.landingTab === 'participant' && !s.pendingSlotId,
+      codeEntryMode: s.landingTab === 'participant' && !!s.pendingSlotId,
+      pendingName: pendingSlot ? pendingSlot.name : '',
+      codeInput: s.codeInput, codeErr: s.codeErr, hasCodeErr: !!s.codeErr,
+      onCodeInput: e => this.setState({ codeInput: e.target.value, codeErr: '' }),
+      doSubmitCode: () => this.submitCode(), cancelEntry: () => this.cancelEntry(),
+      newCode: s.newCode, onNewCode: e => this.setState({ newCode: e.target.value }),
+
+      adminLoginMode: !s.adminAuthenticated,
+      adminEnterMode: s.adminAuthenticated && sessionExists, 
+      adminCreateMode: s.adminAuthenticated && !sessionExists,
+      adminCodeInput: s.adminCodeInput, adminErr: s.adminErr, hasAdminErr: !!s.adminErr,
+      onAdminCode: e => this.setState({ adminCodeInput: e.target.value, adminErr: '' }),
+      doAdminLogin: () => this.adminLogin(),
+      doEnterAdmin: () => this.enterAdmin(), doResetAsk: () => this.resetSession(),
+      createTitle: s.createTitle, createNames: s.createNames,
+      createMaxSelf: s.createMaxSelf, createMaxPeer: s.createMaxPeer,
+      onCreateTitle: e => this.setState({ createTitle: e.target.value }),
+      onCreateNames: e => this.setState({ createNames: e.target.value }),
+      onCreateMaxSelf: e => this.setState({ createMaxSelf: e.target.value }),
+      onCreateMaxPeer: e => this.setState({ createMaxPeer: e.target.value }),
+      nameCountLabel: roster.length > 0 ? `${roster.length}명 등록 예정` : '아직 입력된 이름이 없어요',
+      doCreate: () => this.createSession(),
+      inputFocus: { borderColor: '#C2714F' }, greenHover: { background: '#6B7A5E' }, primaryHover: { background: '#A85737' },
+      resetHover: { background: '#FFEBEB', borderColor: '#F5C2C7' },
+
+      myName,
+      goSelf: () => this.setState({ participantTab: 'self' }),
+      goPeer: () => this.setState({ participantTab: 'peer', peerTargetId: null }),
+      goResult: () => this.setState({ participantTab: 'result' }),
+      tabSelfStyle: this._tabStyle(pTab === 'self'), tabPeerStyle: this._tabStyle(pTab === 'peer'), tabResultStyle: this._tabStyle(pTab === 'result'),
+      pSelf, pPeerPick, pPeerEval, pResult,
+      selfChips, selfCount, maxSelf, doSaveSelf: () => this.saveSelf(),
+      savePrimaryStyle: { padding: '12px 24px', borderRadius: '12px', border: 'none', background: selfCount > 0 ? '#C2714F' : '#DDD2C2', color: '#fff', fontSize: '15px', fontWeight: 600, cursor: selfCount > 0 ? 'pointer' : 'default', fontFamily: 'inherit' },
+      peerTargets, hasTargets: peerTargets.length > 0, noTargets: peerTargets.length === 0, peerDoneCount, targetCount: peerTargets.length,
+      targetName, peerChips, peerCount, maxPeer, doSubmitPeer: () => this.submitPeer(), backToPick: () => this.clearTarget(),
+      submitPrimaryStyle: { padding: '12px 24px', borderRadius: '12px', border: 'none', background: peerCount > 0 ? '#C2714F' : '#DDD2C2', color: '#fff', fontSize: '15px', fontWeight: 600, cursor: peerCount > 0 ? 'pointer' : 'default', fontFamily: 'inherit' },
+
+      openWords: res.open, hiddenWords: res.hidden, blindWords: res.blind, unknownWords: res.unknown,
+      doSaveResultImage: () => this.saveResultImage(resultTargetId),
+      total, others, joinedCount, selfDone, adminRoster, adminEmpty: total === 0,
+      extTotal,
+      resultExtCount: resultTargetId ? extCountFor(resultTargetId) : 0,
+      hasResultExt: !!resultTargetId && extCountFor(resultTargetId) > 0,
+      resultName, adminHasView: !!s.adminViewId && !!rt, adminNoView: !(s.adminViewId && rt),
+      notEvalNames: notEval.map(t => ({ name: t.name })), notEvalCount: notEval.length ? `${notEval.length}명` : '', notEvalDone: !!resultTargetId && notEval.length === 0,
+      newName: s.newName, onNewName: e => this.setState({ newName: e.target.value }), doAddName: () => this.addName(),
+
+      toast: s.toast, hasToast: !!s.toast,
+      
+      // 외부 평가 관련
+      v_external,
+      evalTargetName: s.evalTargetName,
+      externalEvalCompleted: s.externalEvalCompleted,
+      externalChips: pool.map(w => ({ 
+        word: w, 
+        en: this._enMap[w] || '', 
+        style: this._chip(s.externalWords.includes(w)), 
+        onClick: () => this.toggleExternalWord(w) 
+      })),
+      externalCount: s.externalWords.length,
+      maxExternal: (sess && sess.maxPeerWords) || 5,
+      doSubmitExternal: () => this.submitExternalEval(),
+      submitExternalStyle: { 
+        padding: '15px 30px', 
+        borderRadius: '13px', 
+        border: 'none', 
+        background: s.externalWords.length > 0 ? '#C2714F' : '#DDD2C2', 
+        color: '#fff', 
+        fontSize: '16px', 
+        fontWeight: 600, 
+        cursor: s.externalWords.length > 0 ? 'pointer' : 'default', 
+        fontFamily: 'inherit',
+        width: '100%'
+      },
+      
+      // 공유 링크 관련
+      generateShareLink: () => this.generateShareLink(),
+      shareLink: s.shareLink,
+      showShareModal: s.showShareModal,
+      copyShareLink: () => this.copyShareLink(),
+      closeShareModal: () => this.closeShareModal()
+    };
+  }
+}
+</script>
+</body>
+</html>

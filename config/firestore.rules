@@ -1,0 +1,28 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 세션 관련 모든 권한 허용 (개발/테스트용)
+    match /sessions/{sessionId} {
+      // 읽기는 모두 허용
+      allow read: if true;
+      
+      // 쓰기, 삭제 모두 허용 (인증된 사용자)
+      allow create, update, delete: if request.auth != null;
+      
+      // 참가자 하위 컬렉션
+      match /participants/{participantId} {
+        allow read: if true;
+        allow create, update, delete: if request.auth != null;
+        
+        // 투표 하위 컬렉션
+        match /peerVotes/{voteId} {
+          allow read: if true;
+          // 외부 평가 (ext_ 프리픽스) 허용
+          allow create: if request.auth != null || voteId.matches('^ext_.*');
+          allow update, delete: if request.auth != null;
+        }
+      }
+    }
+  }
+}
