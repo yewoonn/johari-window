@@ -2,7 +2,7 @@
 
 ## 📋 Project Overview
 The Johari Window is a psychological tool for improving self-awareness and interpersonal relationships.  
-This web application was developed as part of the PTSTAR Personal Branding Program.
+This web application was developed as part of the [PTSTAR Personal Branding Program](https://ptstar.netlify.app/johari-window.dc).
 
 ## 🎯 Key Features
 - Self-assessment by selecting 5 out of 50 adjectives
